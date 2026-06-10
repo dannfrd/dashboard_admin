@@ -1,0 +1,1 @@
+"# dashboard_admin"  initgit add README.mdgit commit -m "first commit"git branch -M maingit remote add origin https://github.com/dannfrd/dashboard_admin.gitgit push -u origin main
