@@ -20,7 +20,7 @@ export function SidebarItems() {
                 href={item.link}
                 className={`flex items-center gap-3 rounded-lg p-3 text-sm font-semibold transition ${
                   isActive
-                    ? "bg-slate-950 text-white shadow-sm"
+                    ? "bg-emerald-500 text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                 }`}
               >

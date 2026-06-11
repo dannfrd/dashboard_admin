@@ -1,5 +1,5 @@
 import Head from "next/head";
-import "tailwindcss/tailwind.css";
+import "@/styles/globals.css";
 import { AppProps } from "next/app";
 import { DashboardLayout } from "@/dashboard/Layout";
 import { AuthProvider } from "@/auth/AuthContext";
