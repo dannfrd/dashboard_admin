@@ -3,6 +3,7 @@ import React from "react";
 import {
   DermifyAnalysis,
   DermifyDashboardData,
+  DermifyDashboardView,
   DermifyIngredient,
   DermifyProduct,
   DermifyUser,
@@ -10,13 +11,7 @@ import {
   getDermifyDashboardData,
 } from "@/lib/dermifyApi";
 
-export type DashboardView =
-  | "overview"
-  | "analyses"
-  | "users"
-  | "products"
-  | "ingredients"
-  | "histories";
+export type DashboardView = DermifyDashboardView;
 
 interface ContentProps {
   initialView?: DashboardView;
@@ -179,7 +174,7 @@ function Overview({ data }: { data: DermifyDashboardData }) {
         <StatCard
           label="Users"
           value={formatNumber(entities.users)}
-          detail={`${formatNumber(data.users.length)} user ditampilkan dari API`}
+          detail="Total akun yang tersimpan di platform"
           tone="navy"
           icon={
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -603,7 +598,7 @@ export function Content({ initialView = "overview" }: ContentProps) {
   React.useEffect(() => {
     let isMounted = true;
 
-    getDermifyDashboardData()
+    getDermifyDashboardData(initialView)
       .then((result) => {
         if (!isMounted) {
           return;
@@ -629,7 +624,7 @@ export function Content({ initialView = "overview" }: ContentProps) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialView]);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">

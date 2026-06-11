@@ -102,6 +102,14 @@ export type DermifyDashboardData = {
   source: "api" | "sample" | "unavailable";
 };
 
+export type DermifyDashboardView =
+  | "overview"
+  | "analyses"
+  | "users"
+  | "products"
+  | "ingredients"
+  | "histories";
+
 const API_BASE_URL = "/api/dermify";
 
 export type AdminLoginResponse = {
@@ -153,25 +161,59 @@ export async function loginAdmin(email: string, password: string) {
   return payload;
 }
 
-export async function getDermifyDashboardData(): Promise<DermifyDashboardData> {
-  const [summary, users, products, ingredients, analyses, histories] =
-    await Promise.all([
+export async function getDermifyDashboardData(
+  view: DermifyDashboardView,
+): Promise<DermifyDashboardData> {
+  const data: DermifyDashboardData = {
+    ...emptyDermifyDashboardData,
+    source: "api",
+  };
+
+  if (view === "overview") {
+    const [summary, analyses, ingredients] = await Promise.all([
       getJson<MetricsSummary>("/metrics/summary"),
-      getJson<DermifyUser[]>("/metrics/users?limit=200"),
-      getJson<DermifyProduct[]>("/metrics/products?limit=200"),
-      getJson<DermifyIngredient[]>("/metrics/ingredients?limit=200"),
-      getJson<DermifyAnalysis[]>("/metrics/analyses?limit=200"),
-      getJson<DermifyHistory[]>("/metrics/user-histories?limit=200"),
+      getJson<DermifyAnalysis[]>("/metrics/analyses?limit=4"),
+      getJson<DermifyIngredient[]>("/metrics/ingredients?limit=50"),
     ]);
 
+    return { ...data, summary, analyses, ingredients };
+  }
+
+  if (view === "analyses") {
+    return {
+      ...data,
+      analyses: await getJson<DermifyAnalysis[]>("/metrics/analyses?limit=200"),
+    };
+  }
+
+  if (view === "users") {
+    return {
+      ...data,
+      users: await getJson<DermifyUser[]>("/metrics/users?limit=200"),
+    };
+  }
+
+  if (view === "products") {
+    return {
+      ...data,
+      products: await getJson<DermifyProduct[]>("/metrics/products?limit=200"),
+    };
+  }
+
+  if (view === "ingredients") {
+    return {
+      ...data,
+      ingredients: await getJson<DermifyIngredient[]>(
+        "/metrics/ingredients?limit=200",
+      ),
+    };
+  }
+
   return {
-    summary,
-    users,
-    products,
-    ingredients,
-    analyses,
-    histories,
-    source: "api",
+    ...data,
+    histories: await getJson<DermifyHistory[]>(
+      "/metrics/user-histories?limit=200",
+    ),
   };
 }
 
