@@ -44,42 +44,39 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f3f7f5] p-3 sm:p-6">
-      <div className="mx-auto grid min-h-[calc(100vh-24px)] max-w-[1440px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.10)] sm:min-h-[calc(100vh-48px)] lg:grid-cols-[minmax(440px,0.82fr)_1.18fr]">
-        <section className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-14">
-          <div className="w-full max-w-[430px]">
+    <main className="min-h-screen bg-[#f7faf9] p-4 sm:p-6">
+      <div className="mx-auto grid min-h-[calc(100vh-24px)] max-w-5xl overflow-hidden rounded-lg border border-slate-100 bg-white shadow-md sm:min-h-[calc(100vh-48px)] lg:grid-cols-[minmax(360px,0.7fr)_0.9fr]">
+        <section className="flex items-center justify-center px-6 py-8 sm:px-8 lg:px-10">
+          <div className="w-full max-w-[380px]">
             <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
                 <Image
                   src="/images/logo3_home.png"
-                  width={34}
-                  height={34}
+                  width={28}
+                  height={28}
                   alt="Dermify logo"
                   priority
                 />
               </span>
               <div>
-                <p className="text-xl font-bold text-slate-950">Dermify</p>
-                <p className="text-xs font-semibold text-slate-400">
-                  Skincare Intelligence Platform
+                <p className="text-lg font-bold text-slate-950">Dermify</p>
+                <p className="text-xs font-medium text-slate-400">
+                  Skincare Intelligence
                 </p>
               </div>
             </div>
 
-            <div className="mt-12">
-              <p className="text-sm font-bold text-emerald-600">
-                Admin Workspace
-              </p>
-              <h1 className="mt-3 text-4xl font-bold leading-tight text-slate-950">
-                Selamat datang kembali
+            <div className="mt-8">
+              <h1 className="mt-2 text-3xl font-bold leading-tight text-slate-950">
+                Selamat datang
               </h1>
-              <p className="mt-4 max-w-md text-sm leading-6 text-slate-500">
-                Masuk untuk mengelola analisis, pengguna, produk, dan ingredient
-                database Dermify.
+              <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">
+                Masuk untuk mengelola analisis, pengguna, produk, dan database
+                ingredient.
               </p>
             </div>
 
-            <form className="mt-9 space-y-5" onSubmit={handleSubmit}>
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <label className="block">
                 <span className="text-sm font-semibold text-slate-700">
                   Email
@@ -102,7 +99,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-12 w-full rounded-md border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
+                    className="h-11 w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-12 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
                     placeholder="dermify@gmail.com"
                     autoComplete="email"
                     required
@@ -131,7 +128,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="h-12 w-full rounded-md border border-slate-200 bg-slate-50 px-12 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
+                    className="h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-12 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
                     placeholder="Masukkan password"
                     autoComplete="current-password"
                     required
@@ -171,7 +168,7 @@ export default function LoginPage() {
               </label>
 
               {error && (
-                <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
                   {error}
                 </div>
               )}
@@ -179,7 +176,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {isSubmitting ? (
                   <>
@@ -189,55 +186,25 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Masuk ke Dashboard
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="m9 18 6-6-6-6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
                   </>
                 )}
               </button>
             </form>
 
-            <p className="mt-8 text-center text-xs leading-5 text-slate-400">
+            <p className="mt-6 text-center text-xs leading-5 text-slate-400">
               Akses terbatas untuk administrator Dermify.
             </p>
           </div>
         </section>
-
         <section className="relative hidden min-h-full overflow-hidden bg-slate-950 lg:block">
           <Image
-            src="/images/scanproduct.png"
+            src="/images/pict3.png"
             alt="Dermify skincare product analysis"
             fill
             className="object-cover"
             sizes="60vw"
             priority
           />
-          <div className="absolute inset-0 bg-slate-950/70" />
-          <div className="relative flex h-full flex-col justify-between p-12">
-            <div className="flex items-center gap-2 text-sm font-semibold text-white">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-              Dermify Operations
-            </div>
-
-            <div className="max-w-xl text-white">
-              <p className="text-sm font-semibold text-emerald-200">
-                Smart skincare management
-              </p>
-              <h2 className="mt-4 text-5xl font-bold leading-tight">
-                Keputusan yang lebih baik dimulai dari data yang jelas.
-              </h2>
-              <p className="mt-5 max-w-lg text-base leading-7 text-white opacity-75">
-                Pantau aktivitas analisis dan jaga kualitas data skincare
-                Dermify dari satu ruang kerja yang aman.
-              </p>
-            </div>
-          </div>
         </section>
       </div>
     </main>

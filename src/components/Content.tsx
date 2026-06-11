@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import Link from "next/link";
 import {
   DermifyAnalysis,
   DermifyDashboardData,
@@ -106,17 +107,16 @@ function StatCard({
   label: string;
   value: string;
   detail: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   tone?: "mint" | "navy" | "amber" | "rose";
 }) {
   return (
-    <section className="rounded-lg border border-slate-200/70 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <section className="rounded-lg border border-slate-200/70 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
           <p className="mt-3 text-3xl font-bold text-slate-900">{value}</p>
         </div>
-        <Icon tone={tone}>{icon}</Icon>
       </div>
       <p className="mt-4 text-sm text-slate-500">{detail}</p>
     </section>
@@ -154,86 +154,50 @@ function Overview({ data }: { data: DermifyDashboardData }) {
 
   return (
     <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <StatCard
-          label="Total analyses"
-          value={formatNumber(analysis.total)}
-          detail={`${formatNumber(analysis.last_24h)} scan masuk 24 jam terakhir`}
-          tone="mint"
-          icon={
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M7 3h10v4H7V3Zm-2 8h14M5 16h14M7 21h10"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          }
-        />
-        <StatCard
-          label="Users"
-          value={formatNumber(entities.users)}
-          detail="Total akun yang tersimpan di platform"
-          tone="navy"
-          icon={
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          }
-        />
-        <StatCard
-          label="Ingredient DB"
-          value={formatNumber(ingredients.total || entities.ingredients)}
-          detail={`${formatNumber(ingredients.high_risk)} high risk ingredient`}
-          tone="amber"
-          icon={
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M9 3v5l-5 9a3 3 0 0 0 2.6 4.5h10.8A3 3 0 0 0 20 17l-5-9V3M8 3h8M7 15h10"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          }
-        />
-        <StatCard
-          label="Products"
-          value={formatNumber(entities.products)}
-          detail={`${formatNumber(entities.scans)} scan dari aplikasi mobile`}
-          tone="rose"
-          icon={
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6 2h12l2 5v15H4V7l2-5ZM4 7h16M9 11h6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          }
-        />
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4 h-48 md:h-40 lg:h-44">
+        <Link href="/analyses" className="block h-full">
+          <StatCard
+            label="Total analyses"
+            value={formatNumber(analysis.total)}
+            detail={`${formatNumber(analysis.last_24h)} scan masuk 24 jam terakhir`}
+            tone="mint"
+          />
+        </Link>
+        <Link href="/users" className="block h-full">
+          <StatCard
+            label="Users"
+            value={formatNumber(entities.users)}
+            detail="Total akun yang tersimpan di platform"
+            tone="navy"
+          />
+        </Link>
+        <Link href="/ingredients" className="block h-full">
+          <StatCard
+            label="Ingredient DB"
+            value={formatNumber(ingredients.total || entities.ingredients)}
+            detail={`${formatNumber(ingredients.high_risk)} high risk ingredient`}
+            tone="amber"
+          />
+        </Link>
+        <Link href="/products" className="block h-full">
+          <StatCard
+            label="Products"
+            value={formatNumber(entities.products)}
+            detail={`${formatNumber(entities.scans)} scan dari aplikasi mobile`}
+            tone="rose"
+          />
+        </Link>
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.25fr_0.75fr]">
         <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_280px]">
+          <div className="grid grid-cols-1">
             <div className="p-6">
-              <p className="text-sm font-semibold text-emerald-600">
-                Platform overview
-              </p>
               <h1 className="mt-3 max-w-2xl text-3xl font-bold text-slate-950">
-                Pantau performa analisis skincare dalam satu ruang kerja.
+                Pantau performa analisis skincare.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Lihat aktivitas pengguna, kualitas hasil scan, dan perkembangan
-                ingredient database yang digunakan oleh aplikasi Dermify.
+                Pantau aktivitas pengguna, hasil analisis, dan perkembangan database ingredient Dermify.
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <MiniMetric label="Completed" value={`${completedRate}%`} />
@@ -250,16 +214,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
                   value={formatNumber(entities.total_records)}
                 />
               </div>
-            </div>
-            <div className="relative min-h-[220px] bg-[#f0fbf4]">
-              <Image
-                src="/images/scanproduct.png"
-                alt="Dermify product scan"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 280px"
-                priority
-              />
             </div>
           </div>
         </div>
@@ -630,28 +584,12 @@ export function Content({ initialView = "overview" }: ContentProps) {
     <div className="mx-auto w-full max-w-7xl space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-emerald-600">
-            Dermify Workspace
-          </p>
           <h1 className="mt-2 text-3xl font-bold text-slate-950">
             Ringkasan platform
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Pantau pengguna, produk, ingredient database, hasil analisis, dan
-            histori aktivitas aplikasi Dermify.
+            Pantau aktivitas pengguna, hasil analisis, dan perkembangan database ingredient Dermify.  
           </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200">
-            {isLoading
-              ? "Memuat data"
-              : data.source === "api"
-                ? "Data terbaru"
-                : "Data tidak tersedia"}
-          </span>
-          <span className="rounded-md bg-emerald-500 px-3 py-2 text-sm font-semibold text-white">
-            Dermify
-          </span>
         </div>
       </div>
 
