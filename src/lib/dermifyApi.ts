@@ -102,11 +102,7 @@ export type DermifyDashboardData = {
   source: "api" | "sample" | "unavailable";
 };
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_DERMIFY_API_URL?.replace(/\/$/, "") ||
-  "http://localhost:8000";
-
-const API_KEY = process.env.NEXT_PUBLIC_DERMIFY_API_KEY;
+const API_BASE_URL = "/api/dermify";
 
 export type AdminLoginResponse = {
   token: string;
@@ -120,7 +116,7 @@ function getHeaders(): Record<string, string> | undefined {
     return { Authorization: `Bearer ${token}` };
   }
 
-  return API_KEY ? { "x-api-key": API_KEY } : undefined;
+  return undefined;
 }
 
 async function getJson<T>(path: string): Promise<T> {

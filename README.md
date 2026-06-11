@@ -1,56 +1,85 @@
-# Salvia-kit Dashboard v8 Next.js
+# Dermify Admin Dashboard
 
-![Salvia-kit Dashboard v8](https://www.salvia-kit.com/images/dashboards/dashv8.jpg)
+Dashboard Next.js ini memakai proxy server-side `/api/dermify/*`. Browser tidak
+memanggil FastAPI secara langsung, sehingga deployment HTTPS Vercel tetap dapat
+berkomunikasi dengan backend HTTPS di VPS tanpa masalah CORS.
 
-## 📋 Documentation
-You can see the documentation on [http://localhost:3000/admin/documentation](http://localhost:3000/admin/documentation)
+## Local development
 
-## Browser Support
+Isi `.env.local`:
 
-| Chrome | Firefox | Edge | Safari | Opera |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="https://github.com/creativetimofficial/public-assets/blob/master/logos/chrome-logo.png?raw=true" width="64" height="64"> | <img src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/logos/firefox-logo.png" width="64" height="64"> | <img src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/logos/edge-logo.png" width="64" height="64"> | <img src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/logos/safari-logo.png" width="64" height="64"> | <img src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/logos/opera-logo.png" width="64" height="64"> |
-
-## Contribution
-If you would like to contribute on the project, fixing bugs, please follow our [Contribution guide](https://github.com/salvia-kit/dashboard-v4-nextjs/blob/main/contributing.md)
-
-
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+```env
+DERMIFY_API_URL=http://127.0.0.1:8001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Kemudian jalankan:
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Production architecture
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```text
+Browser -> HTTPS Vercel -> Next.js API proxy -> HTTPS Nginx VPS -> FastAPI :8000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Public VPS:
 
-## Learn More
+```text
+43.156.119.43
+```
 
-To learn more about Next.js, take a look at the following resources:
+Alamat private `10.3.0.14` hanya dapat digunakan dari jaringan internal VPS dan
+tidak dapat dijangkau oleh Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup backend di VPS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Jalankan FastAPI hanya pada `127.0.0.1:8000` atau melalui container dengan
+   port tersebut tersedia di host.
+2. Arahkan domain/subdomain API, misalnya `api.example.com`, ke
+   `43.156.119.43`.
+3. Pasang Nginx sebagai reverse proxy ke `127.0.0.1:8000`, lalu aktifkan
+   sertifikat TLS/HTTPS untuk domain API tersebut.
+4. Buka inbound TCP `80` dan `443` pada firewall VPS/security group. Jangan
+   membuka MySQL `3306` atau Uvicorn `8000` ke internet.
+5. Pastikan `.env` backend memiliki `APP_ENV=production`, `DEBUG=false`,
+   `SECRET_KEY` acak yang kuat, dan konfigurasi database production.
+6. Restart backend dan Nginx, lalu uji dari komputer lain:
 
-## Deploy on Vercel
+```bash
+curl https://api.example.com/docs
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Konfigurasi Nginx awal sudah tersedia pada backend di
+`deployment/nginx-no-domain.conf`. Ganti path `/home/skincare/...` bila lokasi
+project di VPS berbeda. Akses `http://43.156.119.43` dapat dipakai untuk tes
+awal, tetapi tidak aman untuk production karena kredensial login dan JWT akan
+melewati internet tanpa enkripsi.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-"# dashboard_admin" 
+## Deploy ke Vercel
+
+1. Import repository dashboard ke Vercel.
+2. Tambahkan Environment Variable berikut untuk Production, Preview, dan
+   Development:
+
+```env
+DERMIFY_API_URL=https://api.example.com
+```
+
+3. Deploy ulang setelah environment variable disimpan.
+4. Buka halaman login dashboard dan masuk menggunakan akun dengan
+   `role = admin`.
+
+Jangan memakai prefix `NEXT_PUBLIC_` untuk alamat backend atau secret server.
+Dashboard meneruskan JWT admin dari browser, sedangkan FastAPI tetap melakukan
+otorisasi pada setiap endpoint `/metrics/*`.
+
+## Pemeriksaan masalah
+
+- `502` dari `/api/dermify/...`: Vercel tidak dapat menjangkau VPS. Periksa
+  Nginx, firewall TCP 443, sertifikat TLS, dan nilai `DERMIFY_API_URL`.
+- `401`: token login tidak ada/tidak valid atau `SECRET_KEY` backend berubah.
+- `403` saat login: akun ada tetapi kolom `role` bukan `admin`.
+- Jangan gunakan `10.3.0.14` di Vercel karena itu IP private.
