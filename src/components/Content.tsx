@@ -1,4 +1,3 @@
-import Image from "next/image";
 import React from "react";
 import Link from "next/link";
 import {
@@ -74,44 +73,17 @@ function Badge({ value }: { value?: string | null }) {
   );
 }
 
-function Icon({
-  children,
-  tone = "mint",
-}: {
-  children: React.ReactNode;
-  tone?: "mint" | "navy" | "amber" | "rose";
-}) {
-  const tones = {
-    mint: "bg-emerald-50 text-emerald-500",
-    navy: "bg-slate-100 text-slate-700",
-    amber: "bg-amber-50 text-amber-500",
-    rose: "bg-rose-50 text-rose-500",
-  };
-
-  return (
-    <span
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md ${tones[tone]}`}
-    >
-      {children}
-    </span>
-  );
-}
-
 function StatCard({
   label,
   value,
   detail,
-  icon,
-  tone,
 }: {
   label: string;
   value: string;
   detail: string;
-  icon?: React.ReactNode;
-  tone?: "mint" | "navy" | "amber" | "rose";
 }) {
   return (
-    <section className="rounded-lg border border-slate-200/70 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] h-full">
+    <section className="h-full rounded-lg border border-slate-200/70 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
@@ -154,13 +126,12 @@ function Overview({ data }: { data: DermifyDashboardData }) {
 
   return (
     <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4 h-48 md:h-40 lg:h-44">
+      <section className="grid h-48 grid-cols-1 gap-4 md:h-40 lg:h-44 lg:grid-cols-4">
         <Link href="/analyses" className="block h-full">
           <StatCard
             label="Total analyses"
             value={formatNumber(analysis.total)}
             detail={`${formatNumber(analysis.last_24h)} scan masuk 24 jam terakhir`}
-            tone="mint"
           />
         </Link>
         <Link href="/users" className="block h-full">
@@ -168,7 +139,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
             label="Users"
             value={formatNumber(entities.users)}
             detail="Total akun yang tersimpan di platform"
-            tone="navy"
           />
         </Link>
         <Link href="/ingredients" className="block h-full">
@@ -176,7 +146,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
             label="Ingredient DB"
             value={formatNumber(ingredients.total || entities.ingredients)}
             detail={`${formatNumber(ingredients.high_risk)} high risk ingredient`}
-            tone="amber"
           />
         </Link>
         <Link href="/products" className="block h-full">
@@ -184,7 +153,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
             label="Products"
             value={formatNumber(entities.products)}
             detail={`${formatNumber(entities.scans)} scan dari aplikasi mobile`}
-            tone="rose"
           />
         </Link>
       </section>
@@ -600,7 +568,13 @@ export function Content({ initialView = "overview" }: ContentProps) {
         </div>
       )}
 
-      <DataView activeView={initialView} data={data} />
+      {isLoading ? (
+        <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+          Memuat data platform...
+        </div>
+      ) : (
+        <DataView activeView={initialView} data={data} />
+      )}
     </div>
   );
 }
