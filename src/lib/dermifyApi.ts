@@ -380,10 +380,52 @@ export type NotificationCreateRequest = {
 };
 
 export async function createNotification(payload: NotificationCreateRequest) {
+  // Normalize payload: allow `data` and `tokens` to be provided as
+  // JSON-encoded strings (some callers supply serialized values).
+  let normalizedData: Record<string, any> | undefined = undefined;
+  let normalizedTokens: string[] | undefined = undefined;
+
+  // Handle `data` if it's a string (JSON) or an object
+  if (payload.data) {
+    if (typeof payload.data === "string") {
+      try {
+        normalizedData = JSON.parse(payload.data as string);
+      } catch {
+        // Fallback: send object with raw string under `value`
+        try {
+          normalizedData = { value: String(payload.data) };
+        } catch {
+          normalizedData = {};
+        }
+      }
+    } else {
+      normalizedData = payload.data;
+    }
+  }
+
+  // Handle `tokens` if it's a string (JSON array) or an array
+  if (payload.tokens) {
+    if (typeof payload.tokens === "string") {
+      try {
+        const parsed = JSON.parse(payload.tokens as string);
+        if (Array.isArray(parsed)) normalizedTokens = parsed.map((t) => String(t));
+        else normalizedTokens = [String(parsed)];
+      } catch {
+        // Fallback: try splitting by commas/newlines
+        normalizedTokens = String(payload.tokens)
+          .split(/[,\n]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(payload.tokens)) {
+      normalizedTokens = payload.tokens.map((t) => String(t));
+    }
+  }
+
   // Ensure all values in `data` are strings (Firebase messaging requires string-only data)
-  const coercedData = payload.data
+  const coercedData = normalizedData
     ? Object.fromEntries(
-        Object.entries(payload.data).map(([k, v]) => {
+        Object.entries(normalizedData).map(([k, v]) => {
           if (v === null || v === undefined) return [k, ""];
           if (typeof v === "string") return [k, v];
           try {
@@ -398,6 +440,7 @@ export async function createNotification(payload: NotificationCreateRequest) {
   const outgoing = {
     ...payload,
     data: coercedData,
+    tokens: normalizedTokens || undefined,
   } as NotificationCreateRequest;
 
   const response = await fetch(`${API_BASE_URL}/admin/notifications`, {
@@ -459,6 +502,94 @@ export async function sendStoredNotification(notificationId: number) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error((data && data.detail) || "Gagal mengirim notifikasi");
+  }
+
+  return data;
+}
+
+export async function updateNotification(notificationId: number, payload: NotificationCreateRequest) {
+  let normalizedData: Record<string, any> | undefined = undefined;
+  let normalizedTokens: string[] | undefined = undefined;
+
+  if (payload.data) {
+    if (typeof payload.data === "string") {
+      try {
+        normalizedData = JSON.parse(payload.data as string);
+      } catch {
+        try {
+          normalizedData = { value: String(payload.data) };
+        } catch {
+          normalizedData = {};
+        }
+      }
+    } else {
+      normalizedData = payload.data;
+    }
+  }
+
+  if (payload.tokens) {
+    if (typeof payload.tokens === "string") {
+      try {
+        const parsed = JSON.parse(payload.tokens as string);
+        if (Array.isArray(parsed)) normalizedTokens = parsed.map((t) => String(t));
+        else normalizedTokens = [String(parsed)];
+      } catch {
+        normalizedTokens = String(payload.tokens)
+          .split(/[,\n]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(payload.tokens)) {
+      normalizedTokens = payload.tokens.map((t) => String(t));
+    }
+  }
+
+  const coercedData = normalizedData
+    ? Object.fromEntries(
+        Object.entries(normalizedData).map(([k, v]) => {
+          if (v === null || v === undefined) return [k, ""];
+          if (typeof v === "string") return [k, v];
+          try {
+            return [k, String(v)];
+          } catch {
+            return [k, JSON.stringify(v)];
+          }
+        }),
+      )
+    : undefined;
+
+  const outgoing = {
+    ...payload,
+    data: coercedData,
+    tokens: normalizedTokens || undefined,
+  } as NotificationCreateRequest;
+
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(outgoing),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal memperbarui notifikasi");
+  }
+
+  return data as { id: number; sent?: boolean; response?: any };
+}
+
+export async function deleteNotification(notificationId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal menghapus notifikasi");
   }
 
   return data;

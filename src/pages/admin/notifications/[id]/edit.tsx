@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { createNotification } from "@/lib/dermifyApi";
+import { getNotification, updateNotification } from "@/lib/dermifyApi";
 
-export default function CreateNotificationPage() {
+export default function EditNotificationPage() {
   const router = useRouter();
+  const { id } = router.query;
+  const noteId = Number(id);
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [dataText, setDataText] = useState("");
@@ -14,10 +17,11 @@ export default function CreateNotificationPage() {
   const [schedulingType, setSchedulingType] = useState<"now" | "schedule">("now");
   const [scheduledAt, setScheduledAt] = useState("");
   
+  const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Format date helper for the mockup preview
+  // Clock time for preview mockup
   const [currentTimeStr, setCurrentTimeStr] = useState("10:00");
   useEffect(() => {
     const now = new Date();
@@ -26,29 +30,81 @@ export default function CreateNotificationPage() {
     setCurrentTimeStr(`${hrs}:${mins}`);
   }, []);
 
+  function formatDatetimeLocal(isoString?: string | null): string {
+    if (!isoString) return "";
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "";
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth() + 1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const min = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    } catch {
+      return "";
+    }
+  }
+
+  // Load existing notification details
+  useEffect(() => {
+    if (!noteId) return;
+    setIsLoading(true);
+    getNotification(noteId)
+      .then((n) => {
+        if (n.status === "sent") {
+          router.push("/admin/notifications");
+          alert("Notifikasi yang sudah terkirim tidak dapat diedit.");
+          return;
+        }
+
+        setTitle(n.title || "");
+        setBody(n.body || "");
+        
+        if (n.data) {
+          setDataText(JSON.stringify(n.data, null, 2));
+        }
+
+        // Deduce targeting targetType
+        if (n.topic) {
+          if (n.topic === "all") {
+            setTargetType("all");
+          } else {
+            setTargetType("topic");
+            setTopic(n.topic);
+          }
+        } else if (n.tokens && n.tokens.length > 0) {
+          setTargetType("tokens");
+          setTokensText(JSON.stringify(n.tokens));
+        } else {
+          setTargetType("all");
+        }
+
+        // Deduce schedulingType
+        if (n.scheduled_at) {
+          setSchedulingType("schedule");
+          setScheduledAt(formatDatetimeLocal(n.scheduled_at));
+        } else {
+          setSchedulingType("now");
+        }
+      })
+      .catch((err: any) => {
+        setError(err?.message || "Gagal memuat rincian notifikasi");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [noteId, router]);
+
   function tryFormatDataString(text?: string): string | null {
     if (!text) return null;
     const t = text.trim();
     if (!t) return null;
     try {
       let parsed: any = JSON.parse(t);
-      if (typeof parsed === "string") {
-        const inner = parsed.trim();
-        if ((inner.startsWith("{") && inner.endsWith("}")) || (inner.startsWith("[") && inner.endsWith("]"))) {
-          try {
-            parsed = JSON.parse(inner);
-          } catch {}
-        }
-      }
       return JSON.stringify(parsed, null, 2);
     } catch {
-      try {
-        const first = JSON.parse(t);
-        if (typeof first === "string") {
-          const second = JSON.parse(first);
-          return JSON.stringify(second, null, 2);
-        }
-      } catch {}
       return null;
     }
   }
@@ -59,12 +115,6 @@ export default function CreateNotificationPage() {
     if (!t) return null;
     try {
       let parsed: any = JSON.parse(t);
-      if (typeof parsed === "string") {
-        try {
-          const inner = JSON.parse(parsed);
-          if (Array.isArray(inner)) parsed = inner;
-        } catch {}
-      }
       if (Array.isArray(parsed)) return JSON.stringify(parsed);
       return JSON.stringify([String(parsed)]);
     } catch {
@@ -82,7 +132,6 @@ export default function CreateNotificationPage() {
       return;
     }
 
-    // Auto-format data and tokens before processing
     const formattedDataText = tryFormatDataString(dataText?.trim());
     if (formattedDataText !== null) setDataText(formattedDataText);
     const formattedTokensText = formatTokensString(tokensText?.trim());
@@ -92,14 +141,6 @@ export default function CreateNotificationPage() {
     if (dataText.trim()) {
       try {
         let parsed = JSON.parse(dataText.trim());
-        if (typeof parsed === "string") {
-          const inner = parsed.trim();
-          if ((inner.startsWith("{") && inner.endsWith("}")) || (inner.startsWith("[") && inner.endsWith("]"))) {
-            try {
-              parsed = JSON.parse(inner);
-            } catch {}
-          }
-        }
         if (parsed === null || typeof parsed !== "object") {
           setError("Field Data harus berupa JSON object yang valid.");
           return;
@@ -117,21 +158,12 @@ export default function CreateNotificationPage() {
       let parsedTokens: any = null;
       try {
         parsedTokens = JSON.parse(txt);
-        if (typeof parsedTokens === "string") {
-          const inner = parsedTokens.trim();
-          try {
-            const p2 = JSON.parse(inner);
-            if (Array.isArray(p2)) parsedTokens = p2;
-          } catch {}
-        }
       } catch {
         parsedTokens = null;
       }
 
       if (Array.isArray(parsedTokens)) {
         tokens = parsedTokens.map((t) => String(t));
-      } else if (typeof parsedTokens === "string") {
-        tokens = [parsedTokens];
       } else {
         tokens = txt.split(/[\n,]+/).map((t) => t.trim()).filter(Boolean);
       }
@@ -160,13 +192,22 @@ export default function CreateNotificationPage() {
 
     setSaving(true);
     try {
-      await createNotification(payload as any);
+      await updateNotification(noteId, payload as any);
       router.push("/admin/notifications");
     } catch (err: any) {
-      setError(err?.message || "Gagal membuat notifikasi");
+      setError(err?.message || "Gagal menyimpan perubahan");
     } finally {
       setSaving(false);
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 text-center">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-sm text-slate-500 font-medium">Memuat data notifikasi...</p>
+      </div>
+    );
   }
 
   return (
@@ -174,8 +215,8 @@ export default function CreateNotificationPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Buat Notifikasi Baru</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Rancang push notification kampanye Anda dan kirimkan secara instan atau dijadwalkan.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Edit Notifikasi #{noteId}</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Ubah push notification draf atau ubah jadwal pengirimannya.</p>
         </div>
         <Link 
           href="/admin/notifications" 
@@ -184,7 +225,7 @@ export default function CreateNotificationPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali ke Daftar
+          Batal
         </Link>
       </div>
 
@@ -197,7 +238,7 @@ export default function CreateNotificationPage() {
         </div>
       )}
 
-      {/* Workspace Grid */}
+      {/* Grid Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Form Column */}
         <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-6 bg-white border border-slate-100 shadow-sm rounded-2xl p-6">
@@ -375,7 +416,7 @@ export default function CreateNotificationPage() {
                   Menyimpan...
                 </>
               ) : (
-                schedulingType === "now" ? "Buat & Kirim Sekarang" : "Buat & Jadwalkan"
+                schedulingType === "now" ? "Simpan & Kirim Sekarang" : "Simpan Perubahan"
               )}
             </button>
           </div>
@@ -388,15 +429,15 @@ export default function CreateNotificationPage() {
             
             {/* Phone Frame */}
             <div className="relative mx-auto max-w-[300px] aspect-[9/18.5] rounded-[38px] border-[6px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden ring-4 ring-slate-900/5">
-              {/* Phone Speaker & Camera Notch */}
+              {/* Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-5 w-24 bg-slate-850 rounded-b-xl z-20 flex items-center justify-center gap-1.5 px-3">
                 <div className="w-8 h-1 bg-slate-700 rounded-full"></div>
                 <div className="w-2.5 h-2.5 bg-slate-800 border border-slate-700 rounded-full"></div>
               </div>
 
-              {/* Wallpaper/Screen Content */}
+              {/* Wallpaper */}
               <div className="w-full h-full bg-gradient-to-b from-[#1b1c30] via-[#3a3b5a] to-[#121323] p-4 flex flex-col justify-between relative">
-                {/* Lock Screen Status bar */}
+                {/* Status Bar */}
                 <div className="flex justify-between items-center text-[10px] text-white/80 font-medium px-2 pt-1.5">
                   <span>{currentTimeStr}</span>
                   <div className="flex items-center gap-1">
@@ -409,7 +450,7 @@ export default function CreateNotificationPage() {
                   </div>
                 </div>
 
-                {/* Clock Display */}
+                {/* Clock */}
                 <div className="text-center mt-6 select-none">
                   <h2 className="text-4xl font-light text-white/90 tracking-wide">{currentTimeStr}</h2>
                   <p className="text-[10px] text-white/60 uppercase tracking-widest mt-1 font-semibold">
@@ -417,12 +458,12 @@ export default function CreateNotificationPage() {
                   </p>
                 </div>
 
-                {/* Notification Bubble Mockup */}
-                <div className="absolute top-[32%] left-3 right-3 z-10 animate-pulse-slow">
+                {/* Notification Bubble */}
+                <div className="absolute top-[32%] left-3 right-3 z-10">
                   <div className="rounded-2xl bg-white/85 backdrop-blur-lg border border-white/20 p-3.5 shadow-xl text-slate-800 shadow-slate-950/20">
                     <div className="flex items-center justify-between border-b border-slate-700/10 pb-1.5 mb-2">
                       <div className="flex items-center gap-1.5">
-                        {/* Mock App Icon */}
+                        {/* Icon */}
                         <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
                           D
                         </div>
@@ -430,8 +471,7 @@ export default function CreateNotificationPage() {
                       </div>
                       <span className="text-[9px] text-slate-500 font-medium">Baru saja</span>
                     </div>
-                    
-                    {/* Live Preview Text */}
+
                     <div className="space-y-0.5">
                       <h4 className="text-xs font-bold text-slate-900 break-words leading-tight">
                         {title.trim() || "💡 Judul Notifikasi Anda"}
@@ -443,7 +483,7 @@ export default function CreateNotificationPage() {
                   </div>
                 </div>
 
-                {/* Bottom Swipe Indicator */}
+                {/* Swipe Indicator */}
                 <div className="flex flex-col items-center gap-1.5 pb-2">
                   <div className="w-4 h-4 text-white/50 animate-bounce">
                     <svg fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -454,21 +494,9 @@ export default function CreateNotificationPage() {
                 </div>
               </div>
             </div>
-
-            {/* Informational Hint */}
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-4 text-[11px] text-slate-500 mt-5 leading-relaxed">
-              <h5 className="font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
-                </svg>
-                Catatan Desain & UX
-              </h5>
-              Push notification dikirimkan menggunakan FCM Legacy/V1 API. Pastikan aplikasi mobile (Flutter/Native) Anda mendengarkan payload yang dikirimkan sesuai dengan key-value pada field custom data untuk meluncurkan router tujuan di sisi client.
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

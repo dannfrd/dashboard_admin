@@ -37,7 +37,7 @@ export const data = [
   },
   {
     title: "Products",
-    link: "/products",
+    link: "/admin/products",
     icon: (
       <path
         d="M6 2h12l2 5v15H4V7l2-5ZM4 7h16M9 11h6"
@@ -50,7 +50,7 @@ export const data = [
   },
   {
     title: "Ingredients",
-    link: "/ingredients",
+    link: "/admin/ingredients",
     icon: (
       <path
         d="M9 3v5l-5 9a3 3 0 0 0 2.6 4.5h10.8A3 3 0 0 0 20 17l-5-9V3M8 3h8M7 15h10"
