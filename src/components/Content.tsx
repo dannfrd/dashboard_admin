@@ -9,6 +9,8 @@ import {
   DermifyUser,
   emptyDermifyDashboardData,
   getDermifyDashboardData,
+  deleteProduct,
+  deleteIngredient,
 } from "@/lib/dermifyApi";
 
 export type DashboardView = DermifyDashboardView;
@@ -157,7 +159,7 @@ function Overview({ data }: { data: DermifyDashboardData }) {
         </Link>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.25fr_0.75fr]">
+      <section >
         <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <div className="grid grid-cols-1">
             <div className="p-6">
@@ -185,36 +187,7 @@ function Overview({ data }: { data: DermifyDashboardData }) {
             </div>
           </div>
         </div>
-
-        <div className="rounded-lg border border-slate-200/70 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Risk distribution
-              </p>
-              <p className="mt-2 text-2xl font-bold text-slate-950">
-                {formatNumber(riskTotal)}
-              </p>
-            </div>
-            <Badge value="ingredients" />
-          </div>
-          <div className="mt-6 h-3 overflow-hidden rounded bg-slate-100">
-            <div
-              className="h-full bg-rose-400"
-              style={{ width: `${highRiskWidth}%` }}
-            />
-          </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <RiskLine label="Low" value={ingredients.low_risk} tone="emerald" />
-            <RiskLine label="Medium" value={ingredients.medium_risk} tone="amber" />
-            <RiskLine label="High" value={ingredients.high_risk} tone="rose" />
-            <RiskLine
-              label="Unknown"
-              value={ingredients.unknown_risk}
-              tone="slate"
-            />
-          </div>
-        </div>
+        
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]">
@@ -379,44 +352,96 @@ function UsersTable({ items }: { items: DermifyUser[] }) {
   );
 }
 
-function ProductsTable({ items }: { items: DermifyProduct[] }) {
+function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?: (id: number) => Promise<void> }) {
   if (!items.length) {
     return <EmptyState label="Tidak ada data product." />;
   }
 
-  return (
-    <Table
-      headers={["ID", "Product", "Brand", "Category", "Scans", "Analyses"]}
-      rows={items.map((item) => [
-        `#${item.id}`,
-        item.name || "-",
-        item.brand || "-",
-        item.category || "-",
-        formatNumber(item.scan_count),
-        formatNumber(item.analysis_count),
-      ])}
-    />
-  );
+  const headers = ["ID", "Product", "Brand", "Category", "Scans", "Analyses"];
+  if (onDelete) headers.push("Actions");
+
+  const rows = items.map((item) => {
+    const base = [
+      `#${item.id}`,
+      item.name || "-",
+      item.brand || "-",
+      item.category || "-",
+      formatNumber(item.scan_count),
+      formatNumber(item.analysis_count),
+    ] as React.ReactNode[];
+
+    if (onDelete) {
+      base.push(
+        <div className="flex gap-3">
+          <Link key="edit" href={`/admin/products/${item.id}/edit`} className="text-emerald-600">Edit</Link>
+          <button
+            key="del"
+            onClick={async () => {
+              if (!confirm("Hapus produk ini?")) return;
+              try {
+                await onDelete(item.id);
+              } catch (err: any) {
+                alert(err?.message || "Gagal menghapus produk");
+              }
+            }}
+            className="text-rose-600"
+          >
+            Delete
+          </button>
+        </div>,
+      );
+    }
+
+    return base;
+  });
+
+  return <Table headers={headers} rows={rows} />;
 }
 
-function IngredientsTable({ items }: { items: DermifyIngredient[] }) {
+function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onDelete?: (id: number) => Promise<void> }) {
   if (!items.length) {
     return <EmptyState label="Tidak ada data ingredient." />;
   }
 
-  return (
-    <Table
-      headers={["ID", "Ingredient", "Function", "Risk", "Usage", "Created"]}
-      rows={items.map((item) => [
-        `#${item.id}`,
-        item.name || "-",
-        item.function || "-",
-        <Badge key="risk" value={item.risk_level} />,
-        formatNumber(item.usage_count),
-        formatDate(item.created_at),
-      ])}
-    />
-  );
+  const headers = ["ID", "Ingredient", "Function", "Risk", "Usage", "Created"];
+  if (onDelete) headers.push("Actions");
+
+  const rows = items.map((item) => {
+    const base: React.ReactNode[] = [
+      `#${item.id}`,
+      item.name || "-",
+      item.function || "-",
+      <Badge key="risk" value={item.risk_level} />,
+      formatNumber(item.usage_count),
+      formatDate(item.created_at),
+    ];
+
+    if (onDelete) {
+      base.push(
+        <div className="flex gap-3">
+          <Link key="edit" href={`/admin/ingredients/${item.id}/edit`} className="text-emerald-600">Edit</Link>
+          <button
+            key="del"
+            onClick={async () => {
+              if (!confirm("Hapus ingredient ini?")) return;
+              try {
+                await onDelete(item.id);
+              } catch (err: any) {
+                alert(err?.message || "Gagal menghapus ingredient");
+              }
+            }}
+            className="text-rose-600"
+          >
+            Delete
+          </button>
+        </div>,
+      );
+    }
+
+    return base;
+  });
+
+  return <Table headers={headers} rows={rows} />;
 }
 
 function HistoriesTable({ data }: { data: DermifyDashboardData }) {
@@ -493,18 +518,39 @@ function DataView({
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-950">{title}</h1>
-        <p className="mt-2 text-sm text-slate-500">
-          Kelola dan tinjau data operasional Dermify.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-950">{title}</h1>
+          <p className="mt-2 text-sm text-slate-500">Kelola dan tinjau data operasional Dermify.</p>
+        </div>
+        {activeView === "products" && (
+          <div>
+            <Link href="/admin/products/create" className="rounded bg-emerald-500 px-3 py-1 text-white">
+              Buat Produk
+            </Link>
+          </div>
+        )}
       </div>
       {activeView === "analyses" && <AnalysesTable items={data.analyses} />}
       {activeView === "users" && <UsersTable items={data.users} />}
-      {activeView === "products" && <ProductsTable items={data.products} />}
-      {activeView === "ingredients" && (
-        <IngredientsTable items={data.ingredients} />
-      )}
+      {activeView === "products" && <ProductsTable items={data.products} onDelete={async (id: number) => {
+        // default delete handler uses API client and reloads data via full page refresh as fallback
+        try {
+          await deleteProduct(id);
+          // After delete, refresh page to fetch new data
+          location.reload();
+        } catch (err: any) {
+          alert(err?.message || "Gagal menghapus produk");
+        }
+      }} />}
+      {activeView === "ingredients" && <IngredientsTable items={data.ingredients} onDelete={async (id: number) => {
+        try {
+          await deleteIngredient(id);
+          location.reload();
+        } catch (err: any) {
+          alert(err?.message || "Gagal menghapus ingredient");
+        }
+      }} />}
       {activeView === "histories" && <HistoriesTable data={data} />}
     </div>
   );
