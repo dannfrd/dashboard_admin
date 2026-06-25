@@ -121,8 +121,28 @@ function getHeaders(): Record<string, string> | undefined {
   const token = getStoredAdminToken();
 
   if (token) {
-    return { Authorization: `Bearer ${token}` };
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+
+    // Optionally include monitoring API key from public env for dev/testing
+    // Use NEXT_PUBLIC_MONITORING_API_KEY in .env to expose to client if needed
+    try {
+      // process.env is replaced at build-time by Next.js for NEXT_PUBLIC_* vars
+      const publicKey = process.env.NEXT_PUBLIC_MONITORING_API_KEY;
+      if (publicKey) {
+        headers["X-Api-Key"] = String(publicKey);
+      }
+    } catch {}
+
+    return headers;
   }
+
+  // If no admin token, still allow X-Api-Key from public env (optional)
+  try {
+    const publicKey = process.env.NEXT_PUBLIC_MONITORING_API_KEY;
+    if (publicKey) {
+      return { "X-Api-Key": String(publicKey) };
+    }
+  } catch {}
 
   return undefined;
 }
@@ -159,6 +179,420 @@ export async function loginAdmin(email: string, password: string) {
   }
 
   return payload;
+}
+
+export type ProductCreateRequest = {
+  name: string;
+  brand?: string | null;
+  category?: string | null;
+  barcode?: string | null;
+};
+
+export type ProductUpdateRequest = {
+  name?: string | null;
+  brand?: string | null;
+  category?: string | null;
+  barcode?: string | null;
+};
+
+export async function createProduct(payload: ProductCreateRequest) {
+  const response = await fetch(`${API_BASE_URL}/admin/products`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal membuat produk");
+  }
+
+  return data as { id: number };
+}
+
+export async function getProduct(productId: number): Promise<DermifyProduct> {
+  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
+    headers: getHeaders(),
+  });
+
+  const text = await response.text();
+  let payload: any;
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    payload = text;
+  }
+
+  if (!response.ok) {
+    const detail = payload && payload.detail ? payload.detail : text || `Status ${response.status}`;
+    throw new Error(String(detail));
+  }
+
+  return payload as DermifyProduct;
+}
+
+export async function updateProduct(
+  productId: number,
+  payload: ProductUpdateRequest,
+) {
+  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal memperbarui produk");
+  }
+
+  return data;
+}
+
+export async function deleteProduct(productId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/products/${productId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal menghapus produk");
+  }
+
+  return data;
+}
+
+export type IngredientCreateRequest = {
+  name: string;
+  description?: string | null;
+  function?: string | null;
+  risk_level?: string | null;
+};
+
+export type IngredientUpdateRequest = {
+  name?: string | null;
+  description?: string | null;
+  function?: string | null;
+  risk_level?: string | null;
+};
+
+export async function createIngredient(payload: IngredientCreateRequest) {
+  const response = await fetch(`${API_BASE_URL}/admin/ingredients`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal membuat ingredient");
+  }
+
+  return data as { id: number };
+}
+
+export async function getIngredient(ingredientId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/ingredients/${ingredientId}`, {
+    headers: getHeaders(),
+  });
+
+  const text = await response.text();
+  let payload: any;
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    payload = text;
+  }
+
+  if (!response.ok) {
+    const detail = payload && payload.detail ? payload.detail : text || `Status ${response.status}`;
+    throw new Error(String(detail));
+  }
+
+  return payload;
+}
+
+export async function updateIngredient(ingredientId: number, payload: IngredientUpdateRequest) {
+  const response = await fetch(`${API_BASE_URL}/admin/ingredients/${ingredientId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal memperbarui ingredient");
+  }
+
+  return data;
+}
+
+export async function deleteIngredient(ingredientId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/ingredients/${ingredientId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal menghapus ingredient");
+  }
+
+  return data;
+}
+
+// --- Notifications ---
+export type NotificationItem = {
+  id: number;
+  title: string;
+  body?: string | null;
+  data?: Record<string, any> | null;
+  topic?: string | null;
+  tokens?: string[] | null;
+  status: string;
+  scheduled_at?: string | null;
+  sent_at?: string | null;
+  sent_by?: number | null;
+  created_at?: string | null;
+};
+
+export type NotificationCreateRequest = {
+  title: string;
+  body?: string | null;
+  data?: Record<string, any> | null;
+  topic?: string | null;
+  tokens?: string[] | null;
+  scheduled_at?: string | null; // ISO
+  send_now?: boolean;
+};
+
+export async function createNotification(payload: NotificationCreateRequest) {
+  // Normalize payload: allow `data` and `tokens` to be provided as
+  // JSON-encoded strings (some callers supply serialized values).
+  let normalizedData: Record<string, any> | undefined = undefined;
+  let normalizedTokens: string[] | undefined = undefined;
+
+  // Handle `data` if it's a string (JSON) or an object
+  if (payload.data) {
+    if (typeof payload.data === "string") {
+      try {
+        normalizedData = JSON.parse(payload.data as string);
+      } catch {
+        // Fallback: send object with raw string under `value`
+        try {
+          normalizedData = { value: String(payload.data) };
+        } catch {
+          normalizedData = {};
+        }
+      }
+    } else {
+      normalizedData = payload.data;
+    }
+  }
+
+  // Handle `tokens` if it's a string (JSON array) or an array
+  if (payload.tokens) {
+    if (typeof payload.tokens === "string") {
+      try {
+        const parsed = JSON.parse(payload.tokens as string);
+        if (Array.isArray(parsed)) normalizedTokens = parsed.map((t) => String(t));
+        else normalizedTokens = [String(parsed)];
+      } catch {
+        // Fallback: try splitting by commas/newlines
+        normalizedTokens = String(payload.tokens)
+          .split(/[,\n]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(payload.tokens)) {
+      normalizedTokens = payload.tokens.map((t) => String(t));
+    }
+  }
+
+  // Ensure all values in `data` are strings (Firebase messaging requires string-only data)
+  const coercedData = normalizedData
+    ? Object.fromEntries(
+        Object.entries(normalizedData).map(([k, v]) => {
+          if (v === null || v === undefined) return [k, ""];
+          if (typeof v === "string") return [k, v];
+          try {
+            return [k, String(v)];
+          } catch {
+            return [k, JSON.stringify(v)];
+          }
+        }),
+      )
+    : undefined;
+
+  const outgoing = {
+    ...payload,
+    data: coercedData,
+    tokens: normalizedTokens || undefined,
+  } as NotificationCreateRequest;
+
+  const response = await fetch(`${API_BASE_URL}/admin/notifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(outgoing),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal membuat notifikasi");
+  }
+
+  return data as { id: number; sent?: boolean; response?: any };
+}
+
+export async function listNotifications(limit = 50, offset = 0) {
+  const response = await fetch(`${API_BASE_URL}/admin/notifications?limit=${limit}&offset=${offset}`, {
+    headers: getHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to list notifications: ${response.status}`);
+  }
+
+  return (await response.json()) as { items: NotificationItem[] };
+}
+
+export async function getNotification(notificationId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}`, {
+    headers: getHeaders(),
+  });
+
+  const text = await response.text();
+  let payload: any;
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    payload = text;
+  }
+
+  if (!response.ok) {
+    const detail = payload && payload.detail ? payload.detail : text || `Status ${response.status}`;
+    throw new Error(String(detail));
+  }
+
+  return payload as NotificationItem;
+}
+
+export async function sendStoredNotification(notificationId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}/send`, {
+    method: "POST",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal mengirim notifikasi");
+  }
+
+  return data;
+}
+
+export async function updateNotification(notificationId: number, payload: NotificationCreateRequest) {
+  let normalizedData: Record<string, any> | undefined = undefined;
+  let normalizedTokens: string[] | undefined = undefined;
+
+  if (payload.data) {
+    if (typeof payload.data === "string") {
+      try {
+        normalizedData = JSON.parse(payload.data as string);
+      } catch {
+        try {
+          normalizedData = { value: String(payload.data) };
+        } catch {
+          normalizedData = {};
+        }
+      }
+    } else {
+      normalizedData = payload.data;
+    }
+  }
+
+  if (payload.tokens) {
+    if (typeof payload.tokens === "string") {
+      try {
+        const parsed = JSON.parse(payload.tokens as string);
+        if (Array.isArray(parsed)) normalizedTokens = parsed.map((t) => String(t));
+        else normalizedTokens = [String(parsed)];
+      } catch {
+        normalizedTokens = String(payload.tokens)
+          .split(/[,\n]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(payload.tokens)) {
+      normalizedTokens = payload.tokens.map((t) => String(t));
+    }
+  }
+
+  const coercedData = normalizedData
+    ? Object.fromEntries(
+        Object.entries(normalizedData).map(([k, v]) => {
+          if (v === null || v === undefined) return [k, ""];
+          if (typeof v === "string") return [k, v];
+          try {
+            return [k, String(v)];
+          } catch {
+            return [k, JSON.stringify(v)];
+          }
+        }),
+      )
+    : undefined;
+
+  const outgoing = {
+    ...payload,
+    data: coercedData,
+    tokens: normalizedTokens || undefined,
+  } as NotificationCreateRequest;
+
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(outgoing),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal memperbarui notifikasi");
+  }
+
+  return data as { id: number; sent?: boolean; response?: any };
+}
+
+export async function deleteNotification(notificationId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/notifications/${notificationId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal menghapus notifikasi");
+  }
+
+  return data;
 }
 
 export async function getDermifyDashboardData(

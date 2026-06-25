@@ -43,8 +43,13 @@ export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse,
 ) {
-  if (request.method !== "GET" && request.method !== "POST") {
-    response.setHeader("Allow", ["GET", "POST"]);
+  if (
+    request.method !== "GET" &&
+    request.method !== "POST" &&
+    request.method !== "PUT" &&
+    request.method !== "DELETE"
+  ) {
+    response.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
     return response.status(405).json({ detail: "Method tidak diizinkan." });
   }
 
@@ -53,35 +58,78 @@ export default async function handler(
     ? pathSegments.join("/")
     : pathSegments;
 
-  if (!path || (!PUBLIC_ROUTES.has(path) && !ADMIN_ROUTES.has(path))) {
+  if (!path) {
+    return response.status(404).json({ detail: "Endpoint tidak ditemukan." });
+  }
+
+  // Allow admin product CRUD paths like "admin/products" and "admin/products/123"
+  const isAdminProductRoute = path.startsWith("admin/products");
+  const isAdminIngredientRoute = path.startsWith("admin/ingredients");
+  const isAdminNotificationRoute = path.startsWith("admin/notifications");
+  const isAdminRoute =
+    ADMIN_ROUTES.has(path) ||
+    isAdminProductRoute ||
+    isAdminIngredientRoute ||
+    isAdminNotificationRoute;
+  if (!PUBLIC_ROUTES.has(path) && !isAdminRoute) {
     return response.status(404).json({ detail: "Endpoint tidak ditemukan." });
   }
 
   const authorization = request.headers.authorization;
-  if (ADMIN_ROUTES.has(path) && !authorization?.startsWith("Bearer ")) {
+  if (isAdminRoute && !authorization?.startsWith("Bearer ")) {
     return response.status(401).json({ detail: "Login admin diperlukan." });
   }
 
-  try {
+    try {
+    // Debug: log request body for non-GET methods to help trace missing-body issues
+    if (request.method === "PUT" || request.method === "POST") {
+      try {
+        // Avoid logging large bodies in production
+        // eslint-disable-next-line no-console
+        console.log("Dermify proxy body for", path, JSON.stringify(request.body));
+      } catch {}
+    }
+      // Debug: log upstream URL and forwarded headers
+      const upstreamUrl = `${getUpstreamUrl()}/${path}${buildQueryString(request.query)}`;
+      // eslint-disable-next-line no-console
+      console.log("Dermify proxy forwarding", request.method, upstreamUrl);
+      // eslint-disable-next-line no-console
+      console.log("Dermify proxy headers ->", JSON.stringify({
+        authorization: request.headers.authorization,
+        x_api_key: request.headers["x-api-key"],
+        content_type: request.headers["content-type"],
+      }));
     const upstreamResponse = await fetch(
       `${getUpstreamUrl()}/${path}${buildQueryString(request.query)}`,
       {
         method: request.method,
         headers: {
           Accept: "application/json",
-          ...(request.method === "POST"
+          ...(request.method === "POST" || request.method === "PUT"
             ? { "Content-Type": "application/json" }
             : {}),
           ...(authorization ? { Authorization: authorization } : {}),
+          // forward X-Api-Key if present from client
+          ...(request.headers["x-api-key"] ? { "X-Api-Key": String(request.headers["x-api-key"]) } : {}),
         },
         body:
-          request.method === "POST" ? JSON.stringify(request.body) : undefined,
+          request.method === "POST" || request.method === "PUT"
+            ? JSON.stringify(request.body)
+            : undefined,
       },
     );
 
     const contentType =
       upstreamResponse.headers.get("content-type") || "application/json";
     const payload = await upstreamResponse.text();
+
+    // Debug: log upstream response status/body when not OK
+    if (!upstreamResponse.ok) {
+      try {
+        // eslint-disable-next-line no-console
+        console.log("Dermify upstream response", upstreamResponse.status, payload);
+      } catch {}
+    }
 
     response.setHeader("Content-Type", contentType);
     response.setHeader("Cache-Control", "no-store");

@@ -37,7 +37,7 @@ export const data = [
   },
   {
     title: "Products",
-    link: "/products",
+    link: "/admin/products",
     icon: (
       <path
         d="M6 2h12l2 5v15H4V7l2-5ZM4 7h16M9 11h6"
@@ -50,7 +50,7 @@ export const data = [
   },
   {
     title: "Ingredients",
-    link: "/ingredients",
+    link: "/admin/ingredients",
     icon: (
       <path
         d="M9 3v5l-5 9a3 3 0 0 0 2.6 4.5h10.8A3 3 0 0 0 20 17l-5-9V3M8 3h8M7 15h10"
@@ -58,6 +58,16 @@ export const data = [
         strokeWidth="2"
         strokeLinecap="round"
         fill="none"
+      />
+    ),
+  },
+  {
+    title: "Notifications",
+    link: "/admin/notifications",
+    icon: (
+      <path
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 1 1-6 0h6z"
+        fill="currentColor"
       />
     ),
   },
