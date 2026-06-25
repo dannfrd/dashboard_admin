@@ -27,7 +27,7 @@ export default function CreateIngredientPage() {
         function: fn.trim() || null,
       };
       await createIngredient(payload as any);
-      router.push(`/admin/ingredients`);
+      router.push("/admin/ingredients");
     } catch (err: any) {
       setError(err?.message || "Gagal membuat bahan (ingredient)");
     } finally {

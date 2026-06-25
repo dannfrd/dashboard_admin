@@ -29,7 +29,7 @@ export default function CreateProductPage() {
         barcode: barcode.trim() || null,
       };
       await createProduct(payload as any);
-      router.push(`/admin/products`);
+      router.push("/admin/products");
     } catch (err: any) {
       setError(err?.message || "Gagal membuat produk");
     } finally {

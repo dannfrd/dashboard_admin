@@ -291,7 +291,7 @@ export default function CreateNotificationPage() {
                   onChange={(e) => setTokensText(e.target.value)}
                   placeholder="fcm_token_device_1,&#10;fcm_token_device_2"
                   rows={3}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono text-xs"
+                  className="w-full rounded-xl border border-slate-200 p-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono text-xs"
                   onBlur={() => {
                     const f = formatTokensString(tokensText);
                     if (f !== null) setTokensText(f);
@@ -347,7 +347,7 @@ export default function CreateNotificationPage() {
               onChange={(e) => setDataText(e.target.value)}
               placeholder='{&#10;  "screen": "promo_page",&#10;  "discount_code": "BEAUTY20"&#10;}'
               rows={4}
-              className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono text-xs"
+              className="w-full rounded-xl border border-slate-200 p-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono text-xs"
               onBlur={() => {
                 const f = tryFormatDataString(dataText);
                 if (f !== null) setDataText(f);
