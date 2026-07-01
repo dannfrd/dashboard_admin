@@ -163,7 +163,7 @@ export default function CreateNotificationPage() {
       await createNotification(payload as any);
       router.push("/admin/notifications");
     } catch (err: any) {
-      setError(err?.message || "Gagal membuat notifikasi");
+      setError(err?.message || "Failed to create notification");
     } finally {
       setSaving(false);
     }
@@ -174,8 +174,8 @@ export default function CreateNotificationPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Buat Notifikasi Baru</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Rancang push notification kampanye Anda dan kirimkan secara instan atau dijadwalkan.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Create New Notification</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Design your campaign push notification and send it instantly or scheduled.</p>
         </div>
         <Link 
           href="/admin/notifications" 
@@ -184,7 +184,7 @@ export default function CreateNotificationPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali ke Daftar
+          Back to List
         </Link>
       </div>
 
@@ -204,22 +204,22 @@ export default function CreateNotificationPage() {
           {/* Title & Body */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-800">Judul Kampanye <span className="text-rose-500">*</span></label>
+              <label className="block text-sm font-semibold text-slate-800">Title <span className="text-rose-500">*</span></label>
               <input 
                 type="text"
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                placeholder="Masukkan judul notifikasi..."
+                placeholder="Enter notification title..."
                 className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-800">Pesan Utama (Body)</label>
+              <label className="block text-sm font-semibold text-slate-800">Main Message (Body)</label>
               <textarea 
                 value={body} 
                 onChange={(e) => setBody(e.target.value)} 
-                placeholder="Masukkan isi pesan detail notifikasi..."
+                placeholder="Enter detailed notification message..."
                 rows={3}
                 className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 resize-none"
               />
@@ -228,7 +228,7 @@ export default function CreateNotificationPage() {
 
           {/* Targeting Tab Selector */}
           <div className="space-y-3">
-            <label className="block text-sm font-semibold text-slate-800">Target Penerima</label>
+            <label className="block text-sm font-semibold text-slate-800">Target Recipients</label>
             <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100/80 p-1 border border-slate-200/20">
               <button
                 type="button"
@@ -237,7 +237,7 @@ export default function CreateNotificationPage() {
                   targetType === "all" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Semua User
+                All Users
               </button>
               <button
                 type="button"
@@ -246,7 +246,7 @@ export default function CreateNotificationPage() {
                   targetType === "topic" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Topik Segmen
+                Topic Segments
               </button>
               <button
                 type="button"
@@ -255,7 +255,7 @@ export default function CreateNotificationPage() {
                   targetType === "tokens" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Spesifik Device
+                Specific Devices
               </button>
             </div>
 
@@ -264,20 +264,20 @@ export default function CreateNotificationPage() {
               <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 text-xs text-slate-500 space-y-1">
                 <div className="font-semibold text-slate-700 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                  Kategori Pengiriman: Massal (Global)
+                  Delivery Category: Mass (Global)
                 </div>
-                <p>Notifikasi akan dikirimkan ke topik default <strong>&apos;all&apos;</strong>. Semua instalasi aplikasi mobile yang terdaftar pada Firebase akan menerima pesan ini.</p>
+                <p>Notification will be sent to the default topic <strong>&apos;all&apos;</strong>. All mobile app installations registered on Firebase will receive this message.</p>
               </div>
             )}
 
             {targetType === "topic" && (
               <div className="space-y-1.5 animate-slide-down">
-                <label className="block text-xs font-semibold text-slate-500">Nama Topik Firebase</label>
+                <label className="block text-xs font-semibold text-slate-500">Firebase Topic Name</label>
                 <input 
                   type="text"
                   value={topic} 
                   onChange={(e) => setTopic(e.target.value)} 
-                  placeholder="Contoh: promo_juni, tips_skincare"
+                  placeholder="Example: promo_juni, tips_skincare"
                   className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
@@ -285,7 +285,7 @@ export default function CreateNotificationPage() {
 
             {targetType === "tokens" && (
               <div className="space-y-1.5 animate-slide-down">
-                <label className="block text-xs font-semibold text-slate-500">Device Tokens (Pisahkan dengan koma atau baris baru)</label>
+                <label className="block text-xs font-semibold text-slate-500">Device Tokens</label>
                 <textarea
                   value={tokensText}
                   onChange={(e) => setTokensText(e.target.value)}
@@ -297,14 +297,14 @@ export default function CreateNotificationPage() {
                     if (f !== null) setTokensText(f);
                   }}
                 />
-                <p className="text-[11px] text-slate-400">Masukkan daftar token FCM atau format array JSON `[&quot;token1&quot;,&quot;token2&quot;]`.</p>
+                <p className="text-[11px] text-slate-400">Enter FCM tokens or JSON array format `[&quot;token1&quot;,&quot;token2&quot;]`.</p>
               </div>
             )}
           </div>
 
           {/* Scheduling Section */}
           <div className="space-y-3 border-t border-slate-100 pt-5">
-            <label className="block text-sm font-semibold text-slate-800">Waktu Pengiriman</label>
+            <label className="block text-sm font-semibold text-slate-800">Delivery Time</label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer text-sm">
                 <input 
@@ -313,7 +313,7 @@ export default function CreateNotificationPage() {
                   onChange={() => setSchedulingType("now")}
                   className="text-emerald-600 focus:ring-emerald-500"
                 />
-                <span>Kirim Sekarang</span>
+                <span>Send Now</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer text-sm">
                 <input 
@@ -322,7 +322,7 @@ export default function CreateNotificationPage() {
                   onChange={() => setSchedulingType("schedule")}
                   className="text-emerald-600 focus:ring-emerald-500"
                 />
-                <span>Jadwalkan Pengiriman</span>
+                <span>Schedule Delivery</span>
               </label>
             </div>
 
@@ -341,7 +341,7 @@ export default function CreateNotificationPage() {
 
           {/* Custom Metadata JSON Payload */}
           <div className="space-y-2 border-t border-slate-100 pt-5">
-            <label className="block text-sm font-semibold text-slate-800">Data Tambahan / JSON Payload (Opsional)</label>
+            <label className="block text-sm font-semibold text-slate-800">Additional Data / JSON Payload (Optional)</label>
             <textarea
               value={dataText}
               onChange={(e) => setDataText(e.target.value)}
@@ -353,7 +353,7 @@ export default function CreateNotificationPage() {
                 if (f !== null) setDataText(f);
               }}
             />
-            <p className="text-[11px] text-slate-400">Payload custom data untuk navigasi internal aplikasi mobile (dalam bentuk key-value string).</p>
+            <p className="text-[11px] text-slate-400">Enter custom JSON data for internal app navigation.</p>
           </div>
 
           {/* Form Actions */}
@@ -362,7 +362,7 @@ export default function CreateNotificationPage() {
               href="/admin/notifications" 
               className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
             >
-              Batal
+              Cancel
             </Link>
             <button
               type="submit"
@@ -372,10 +372,10 @@ export default function CreateNotificationPage() {
               {saving ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Menyimpan...
+                  Saving...
                 </>
               ) : (
-                schedulingType === "now" ? "Buat & Kirim Sekarang" : "Buat & Jadwalkan"
+                schedulingType === "now" ? "Create & Send Now" : "Create & Schedule"
               )}
             </button>
           </div>
@@ -384,7 +384,7 @@ export default function CreateNotificationPage() {
         {/* Live Mockup Column */}
         <div className="lg:col-span-5 space-y-6">
           <div className="sticky top-6">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Preview Notifikasi Real-time</h3>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Preview Notifications Real-time</h3>
             
             {/* Phone Frame */}
             <div className="relative mx-auto max-w-[300px] aspect-[9/18.5] rounded-[38px] border-[6px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden ring-4 ring-slate-900/5">
@@ -428,16 +428,16 @@ export default function CreateNotificationPage() {
                         </div>
                         <span className="text-[10px] font-bold tracking-wide uppercase text-slate-600">Dermify</span>
                       </div>
-                      <span className="text-[9px] text-slate-500 font-medium">Baru saja</span>
+                      <span className="text-[9px] text-slate-500 font-medium">New</span>
                     </div>
                     
                     {/* Live Preview Text */}
                     <div className="space-y-0.5">
                       <h4 className="text-xs font-bold text-slate-900 break-words leading-tight">
-                        {title.trim() || "💡 Judul Notifikasi Anda"}
+                        {title.trim() || "💡 Your Notification Title"}
                       </h4>
                       <p className="text-[10px] text-slate-600 break-words leading-snug">
-                        {body.trim() || "Masukkan body atau isi pesan notifikasi pada form untuk melihat live preview-nya di sini..."}
+                        {body.trim() || "Enter the notification body or message content in the form to see the live preview here..."}
                       </p>
                     </div>
                   </div>
@@ -455,16 +455,6 @@ export default function CreateNotificationPage() {
               </div>
             </div>
 
-            {/* Informational Hint */}
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-4 text-[11px] text-slate-500 mt-5 leading-relaxed">
-              <h5 className="font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
-                </svg>
-                Catatan Desain & UX
-              </h5>
-              Push notification dikirimkan menggunakan FCM Legacy/V1 API. Pastikan aplikasi mobile (Flutter/Native) Anda mendengarkan payload yang dikirimkan sesuai dengan key-value pada field custom data untuk meluncurkan router tujuan di sisi client.
-            </div>
           </div>
         </div>
       </div>

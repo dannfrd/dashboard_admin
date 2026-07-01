@@ -10,7 +10,7 @@ export const data = [
     ),
   },
   {
-    title: "Analyses",
+    title: "Analysis",
     link: "/analyses",
     icon: (
       <path

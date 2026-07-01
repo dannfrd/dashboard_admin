@@ -22,13 +22,13 @@ export default function AdminProductsPage() {
 
   async function handleDelete(id?: number) {
     if (!id) return;
-    if (!confirm("Hapus produk ini secara permanen dari database?")) return;
+    if (!confirm("Delete this product permanently from the database?")) return;
 
     try {
       await deleteProduct(id);
       load();
     } catch (err: any) {
-      alert(err?.message || "Gagal menghapus produk");
+      alert(err?.message || "Failed to delete product");
     }
   }
 
@@ -60,10 +60,10 @@ export default function AdminProductsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
-            Manajemen Produk
+            Product Management
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Kelola database produk skincare, pantau statistik scan, dan perbarui data barcode produk.
+            Manage skincare product database, monitor scan statistics, and update product barcode data.
           </p>
         </div>
         <Link
@@ -73,7 +73,7 @@ export default function AdminProductsPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Buat Produk
+          Create Product
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default function AdminProductsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Produk</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Products</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.total}</h3>
             </div>
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
@@ -99,7 +99,7 @@ export default function AdminProductsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Scan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Scans</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.totalScans}</h3>
             </div>
             <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
@@ -115,7 +115,7 @@ export default function AdminProductsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Kategori</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Categories</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.uniqueCategories}</h3>
             </div>
             <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
@@ -131,7 +131,7 @@ export default function AdminProductsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rata-rata Scan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Average Scans</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.averageScans}</h3>
             </div>
             <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
@@ -157,7 +157,7 @@ export default function AdminProductsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari berdasarkan nama, brand, atau kategori..."
+            placeholder="Search by name, brand, or category..."
             className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
           />
         </div>
@@ -176,7 +176,7 @@ export default function AdminProductsPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/50 bg-white p-20 shadow-sm text-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="mt-4 text-sm text-slate-500 font-medium">Memuat data produk...</p>
+          <p className="mt-4 text-sm text-slate-500 font-medium">Loading product data...</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all">
@@ -185,11 +185,11 @@ export default function AdminProductsPage() {
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-6 py-4">ID</th>
-                  <th className="px-6 py-4">Nama Produk</th>
+                  <th className="px-6 py-4">Product Name</th>
                   <th className="px-6 py-4">Brand</th>
-                  <th className="px-6 py-4">Kategori</th>
-                  <th className="px-6 py-4 text-center">Jumlah Scan</th>
-                  <th className="px-6 py-4 text-center">Aksi</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4 text-center">Total Scans</th>
+                  <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -214,7 +214,7 @@ export default function AdminProductsPage() {
                             {p.category}
                           </span>
                         ) : (
-                          <span className="text-slate-400 italic text-xs">Belum dikategorikan</span>
+                          <span className="text-slate-400 italic text-xs">Not categorized</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-center font-semibold text-slate-700">

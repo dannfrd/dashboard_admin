@@ -68,11 +68,10 @@ export default function LoginPage() {
 
             <div className="mt-8">
               <h1 className="mt-2 text-3xl font-bold leading-tight text-slate-950">
-                Selamat datang
+                Welcome!
               </h1>
               <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">
-                Masuk untuk mengelola analisis, pengguna, produk, dan database
-                ingredient.
+                Sign in to manage your analytics, users, products, and ingredient databases.
               </p>
             </div>
 
@@ -129,7 +128,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     className="h-11 w-full rounded-md border border-slate-200 bg-slate-50 px-12 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
-                    placeholder="Masukkan password"
+                    placeholder="Enter password"
                     autoComplete="current-password"
                     required
                   />
@@ -137,10 +136,10 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
                     aria-label={
-                      showPassword ? "Sembunyikan password" : "Tampilkan password"
+                      showPassword ? "Hide password" : "Show Password"
                     }
                     title={
-                      showPassword ? "Sembunyikan password" : "Tampilkan password"
+                      showPassword ? "Hide password" : "Show Password"
                     }
                     className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                   >
@@ -181,18 +180,18 @@ export default function LoginPage() {
                 {isSubmitting ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Memverifikasi
+                    Verifying...
                   </>
                 ) : (
                   <>
-                    Masuk ke Dashboard
+                    Sign in to Dashboard
                   </>
                 )}
               </button>
             </form>
 
             <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-              Akses terbatas untuk administrator Dermify.
+              Limited access for Dermify administrators.
             </p>
           </div>
         </section>
