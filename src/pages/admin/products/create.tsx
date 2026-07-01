@@ -15,7 +15,7 @@ export default function CreateProductPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError("Nama produk wajib diisi");
+      setError("Product name is required");
       return;
     }
 
@@ -31,7 +31,7 @@ export default function CreateProductPage() {
       await createProduct(payload as any);
       router.push("/admin/products");
     } catch (err: any) {
-      setError(err?.message || "Gagal membuat produk");
+      setError(err?.message || "Failed to create product");
     } finally {
       setIsSaving(false);
     }
@@ -42,8 +42,8 @@ export default function CreateProductPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Buat Produk Baru</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Tambahkan produk skincare baru ke dalam database master Dermify.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Create New Product</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Add a new skincare product to the Dermify master database.</p>
         </div>
         <Link 
           href="/admin/products" 
@@ -52,7 +52,7 @@ export default function CreateProductPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Batal
+          Cancel
         </Link>
       </div>
 
@@ -68,12 +68,12 @@ export default function CreateProductPage() {
       {/* Form Container */}
       <form onSubmit={handleSubmit} className="bg-white border border-slate-100 shadow-sm rounded-2xl p-6 space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-slate-800">Nama Produk <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800">Product Name <span className="text-rose-500">*</span></label>
           <input 
             type="text"
             value={name} 
             onChange={(e) => setName(e.target.value)} 
-            placeholder="Contoh: Hydrating Cleanser"
+            placeholder="Example: Hydrating Cleanser"
             className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
             required
           />
@@ -81,34 +81,34 @@ export default function CreateProductPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-800">Merek (Brand)</label>
+            <label className="block text-sm font-semibold text-slate-800">Brand</label>
             <input 
               type="text"
               value={brand} 
               onChange={(e) => setBrand(e.target.value)} 
-              placeholder="Contoh: Dermify Lab"
+              placeholder="Example: Dermify Lab"
               className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-800">Kategori</label>
+            <label className="block text-sm font-semibold text-slate-800">Category</label>
             <input 
               type="text"
               value={category} 
               onChange={(e) => setCategory(e.target.value)} 
-              placeholder="Contoh: Cleanser, Serum, Toner"
+              placeholder="Example: Cleanser, Serum, Toner"
               className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-800">Kode Barcode (Opsional)</label>
+          <label className="block text-sm font-semibold text-slate-800">Product Barcode (Optional)</label>
           <input 
             type="text"
             value={barcode} 
             onChange={(e) => setBarcode(e.target.value)} 
-            placeholder="Contoh: 899000000001"
+            placeholder="Example: 899000000001"
             className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono"
           />
         </div>
@@ -119,7 +119,7 @@ export default function CreateProductPage() {
             href="/admin/products" 
             className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            Batal
+            Cancel
           </Link>
           <button
             type="submit"
@@ -129,10 +129,10 @@ export default function CreateProductPage() {
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Membuat...
+                Creating...
               </>
             ) : (
-              "Buat Produk"
+              "Create Product"
             )}
           </button>
         </div>

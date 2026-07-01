@@ -37,10 +37,10 @@ export function SidebarItems() {
       <div className="mt-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <p className="text-sm font-bold text-slate-950">Platform online</p>
+          <p className="text-sm font-bold text-slate-950">Online Platform</p>
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Data operasional Dermify tersinkron dengan layanan analisis.
+          Dermify's operational data is synchronized with analytics services.
         </p>
       </div>
     </nav>

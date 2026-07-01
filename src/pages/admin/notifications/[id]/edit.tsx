@@ -55,7 +55,7 @@ export default function EditNotificationPage() {
       .then((n) => {
         if (n.status === "sent") {
           router.push("/admin/notifications");
-          alert("Notifikasi yang sudah terkirim tidak dapat diedit.");
+          alert("Notifications that have been sent cannot be edited.");
           return;
         }
 
@@ -90,7 +90,7 @@ export default function EditNotificationPage() {
         }
       })
       .catch((err: any) => {
-        setError(err?.message || "Gagal memuat rincian notifikasi");
+        setError(err?.message || "Failed to load notification details");
       })
       .finally(() => {
         setIsLoading(false);
@@ -128,7 +128,7 @@ export default function EditNotificationPage() {
     setError(null);
 
     if (!title.trim()) {
-      setError("Title wajib diisi");
+      setError("Title is required");
       return;
     }
 
@@ -142,12 +142,12 @@ export default function EditNotificationPage() {
       try {
         let parsed = JSON.parse(dataText.trim());
         if (parsed === null || typeof parsed !== "object") {
-          setError("Field Data harus berupa JSON object yang valid.");
+          setError("Field Data must be a valid JSON object.");
           return;
         }
         data = parsed as Record<string, any>;
       } catch {
-        setError("Field Data harus berupa JSON object yang valid.");
+        setError("Field Data must be a valid JSON object.");
         return;
       }
     }
@@ -169,14 +169,14 @@ export default function EditNotificationPage() {
       }
 
       if (tokens.length === 0) {
-        setError("Token device tidak boleh kosong jika memilih target spesifik");
+        setError("Token device cannot be empty if selecting a specific target");
         return;
       }
     }
 
     const finalTopic = targetType === "all" ? "all" : (targetType === "topic" ? topic.trim() : undefined);
     if (targetType === "topic" && !finalTopic) {
-      setError("Topic wajib diisi jika memilih target topik");
+      setError("Topic is required if selecting a topic target");
       return;
     }
 
@@ -195,7 +195,7 @@ export default function EditNotificationPage() {
       await updateNotification(noteId, payload as any);
       router.push("/admin/notifications");
     } catch (err: any) {
-      setError(err?.message || "Gagal menyimpan perubahan");
+      setError(err?.message || "Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -205,7 +205,7 @@ export default function EditNotificationPage() {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-center">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-sm text-slate-500 font-medium">Memuat data notifikasi...</p>
+        <p className="mt-4 text-sm text-slate-500 font-medium">Loading notification data...</p>
       </div>
     );
   }
@@ -215,8 +215,8 @@ export default function EditNotificationPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Edit Notifikasi #{noteId}</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Ubah push notification draf atau ubah jadwal pengirimannya.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Edit Notification #{noteId}</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Edit draft push notification or change its scheduling.</p>
         </div>
         <Link 
           href="/admin/notifications" 
@@ -225,7 +225,7 @@ export default function EditNotificationPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Batal
+          Cancel
         </Link>
       </div>
 
@@ -245,22 +245,22 @@ export default function EditNotificationPage() {
           {/* Title & Body */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-800">Judul Kampanye <span className="text-rose-500">*</span></label>
+              <label className="block text-sm font-semibold text-slate-800">Title <span className="text-rose-500">*</span></label>
               <input 
                 type="text"
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                placeholder="Masukkan judul notifikasi..."
+                placeholder="Enter notification title..."
                 className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-800">Pesan Utama (Body)</label>
+              <label className="block text-sm font-semibold text-slate-800">Main Message (Body)</label>
               <textarea 
                 value={body} 
                 onChange={(e) => setBody(e.target.value)} 
-                placeholder="Masukkan isi pesan detail notifikasi..."
+                placeholder="Enter notification detail message..."
                 rows={3}
                 className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 resize-none"
               />
@@ -269,7 +269,7 @@ export default function EditNotificationPage() {
 
           {/* Targeting Tab Selector */}
           <div className="space-y-3">
-            <label className="block text-sm font-semibold text-slate-800">Target Penerima</label>
+            <label className="block text-sm font-semibold text-slate-800">Target Recipients</label>
             <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100/80 p-1 border border-slate-200/20">
               <button
                 type="button"
@@ -278,7 +278,7 @@ export default function EditNotificationPage() {
                   targetType === "all" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Semua User
+                All Users
               </button>
               <button
                 type="button"
@@ -287,7 +287,7 @@ export default function EditNotificationPage() {
                   targetType === "topic" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Topik Segmen
+                Topic Segment
               </button>
               <button
                 type="button"
@@ -296,7 +296,7 @@ export default function EditNotificationPage() {
                   targetType === "tokens" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Spesifik Device
+                Specific Device
               </button>
             </div>
 
@@ -305,20 +305,20 @@ export default function EditNotificationPage() {
               <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 text-xs text-slate-500 space-y-1">
                 <div className="font-semibold text-slate-700 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                  Kategori Pengiriman: Massal (Global)
+                  Delivery Category: Mass (Global)
                 </div>
-                <p>Notifikasi akan dikirimkan ke topik default <strong>&apos;all&apos;</strong>. Semua instalasi aplikasi mobile yang terdaftar pada Firebase akan menerima pesan ini.</p>
+                <p>Notification will be sent to the default topic <strong>&apos;all&apos;</strong>. All mobile app installations registered on Firebase will receive this message.</p>
               </div>
             )}
 
             {targetType === "topic" && (
               <div className="space-y-1.5 animate-slide-down">
-                <label className="block text-xs font-semibold text-slate-500">Nama Topik Firebase</label>
+                <label className="block text-xs font-semibold text-slate-500">Firebase Topic Name</label>
                 <input 
                   type="text"
                   value={topic} 
                   onChange={(e) => setTopic(e.target.value)} 
-                  placeholder="Contoh: promo_juni, tips_skincare"
+                  placeholder="Example: promo_juni, tips_skincare"
                   className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
                 />
               </div>
@@ -326,7 +326,7 @@ export default function EditNotificationPage() {
 
             {targetType === "tokens" && (
               <div className="space-y-1.5 animate-slide-down">
-                <label className="block text-xs font-semibold text-slate-500">Device Tokens (Pisahkan dengan koma atau baris baru)</label>
+                <label className="block text-xs font-semibold text-slate-500">Device Tokens (Separate with comma or new line)</label>
                 <textarea
                   value={tokensText}
                   onChange={(e) => setTokensText(e.target.value)}
@@ -382,7 +382,7 @@ export default function EditNotificationPage() {
 
           {/* Custom Metadata JSON Payload */}
           <div className="space-y-2 border-t border-slate-100 pt-5">
-            <label className="block text-sm font-semibold text-slate-800">Data Tambahan / JSON Payload (Opsional)</label>
+            <label className="block text-sm font-semibold text-slate-800">Additional Data / JSON Payload (Optional)</label>
             <textarea
               value={dataText}
               onChange={(e) => setDataText(e.target.value)}
@@ -394,7 +394,7 @@ export default function EditNotificationPage() {
                 if (f !== null) setDataText(f);
               }}
             />
-            <p className="text-[11px] text-slate-400">Payload custom data untuk navigasi internal aplikasi mobile (dalam bentuk key-value string).</p>
+            <p className="text-[11px] text-slate-400">Payload custom data for internal app navigation (in key-value string format).</p>
           </div>
 
           {/* Form Actions */}
@@ -416,7 +416,7 @@ export default function EditNotificationPage() {
                   Menyimpan...
                 </>
               ) : (
-                schedulingType === "now" ? "Simpan & Kirim Sekarang" : "Simpan Perubahan"
+                schedulingType === "now" ? "Save & Send Now" : "Save Changes"
               )}
             </button>
           </div>
@@ -425,7 +425,7 @@ export default function EditNotificationPage() {
         {/* Live Mockup Column */}
         <div className="lg:col-span-5 space-y-6">
           <div className="sticky top-6">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Preview Notifikasi Real-time</h3>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Preview Notification Real-time</h3>
             
             {/* Phone Frame */}
             <div className="relative mx-auto max-w-[300px] aspect-[9/18.5] rounded-[38px] border-[6px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden ring-4 ring-slate-900/5">
@@ -474,10 +474,10 @@ export default function EditNotificationPage() {
 
                     <div className="space-y-0.5">
                       <h4 className="text-xs font-bold text-slate-900 break-words leading-tight">
-                        {title.trim() || "💡 Judul Notifikasi Anda"}
+                        {title.trim() || "💡 Notification Title"}
                       </h4>
                       <p className="text-[10px] text-slate-600 break-words leading-snug">
-                        {body.trim() || "Masukkan body atau isi pesan notifikasi pada form untuk melihat live preview-nya di sini..."}
+                        {body.trim() || "Enter the notification body or message in the form to see the live preview here..."}
                       </p>
                     </div>
                   </div>

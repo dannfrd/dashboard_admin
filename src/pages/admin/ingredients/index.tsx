@@ -22,13 +22,13 @@ export default function AdminIngredientsPage() {
 
   async function handleDelete(id?: number) {
     if (!id) return;
-    if (!confirm("Hapus bahan (ingredient) ini secara permanen dari database?")) return;
+    if (!confirm("Delete this ingredient permanently from the database?")) return;
 
     try {
       await deleteIngredient(id);
       load();
     } catch (err: any) {
-      alert(err?.message || "Gagal menghapus ingredient");
+      alert(err?.message || "Failed to delete ingredient");
     }
   }
 
@@ -60,10 +60,10 @@ export default function AdminIngredientsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
-            Manajemen Bahan (Ingredients)
+            Ingredient Management
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Kelola kamus bahan kosmetik/skincare dan pantau frekuensi penggunaannya pada produk.
+            Manage the cosmetic/skincare ingredient database and monitor their usage frequency in products.
           </p>
         </div>
         <Link
@@ -73,7 +73,7 @@ export default function AdminIngredientsPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Buat Bahan
+          Create Ingredients
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default function AdminIngredientsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Bahan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Ingredients</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.total}</h3>
             </div>
             <div className="rounded-xl bg-slate-100 p-3 text-slate-600">
@@ -99,12 +99,12 @@ export default function AdminIngredientsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rata-rata Scan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Average Usage</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.averageUsage}</h3>
             </div>
             <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-２a２ ２ ０ ０１－２ －２z" />
               </svg>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function AdminIngredientsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Bahan Aktif</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Ingredients</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.activeCount}</h3>
             </div>
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
@@ -131,7 +131,7 @@ export default function AdminIngredientsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Tidak Digunakan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Inactive Ingredients</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.inactiveCount}</h3>
             </div>
             <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
@@ -157,7 +157,7 @@ export default function AdminIngredientsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari berdasarkan nama atau fungsi..."
+            placeholder="Search by name or function..."
             className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
           />
         </div>
@@ -176,7 +176,7 @@ export default function AdminIngredientsPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/50 bg-white p-20 shadow-sm text-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="mt-4 text-sm text-slate-500 font-medium">Memuat data ingredients...</p>
+          <p className="mt-4 text-sm text-slate-500 font-medium">Loading ingredient data...</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all">
@@ -185,17 +185,17 @@ export default function AdminIngredientsPage() {
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-6 py-4">ID</th>
-                  <th className="px-6 py-4">Nama Bahan</th>
-                  <th className="px-6 py-4">Fungsi Utama</th>
-                  <th className="px-6 py-4 text-center">Frekuensi Penggunaan</th>
-                  <th className="px-6 py-4 text-center">Aksi</th>
+                  <th className="px-6 py-4">Ingredient Name</th>
+                  <th className="px-6 py-4">Main Function</th>
+                  <th className="px-6 py-4 text-center">Usage Frequency</th>
+                  <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredItems.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-400">
-                      {searchQuery ? "Tidak menemukan hasil bahan yang cocok." : "Belum ada data ingredients."}
+                      {searchQuery ? "Didn't find any matching results." : "No ingredient data available."}
                     </td>
                   </tr>
                 ) : (
@@ -206,7 +206,7 @@ export default function AdminIngredientsPage() {
                         <td className="px-6 py-4 font-semibold text-slate-900">{it.name || "-"}</td>
                         <td className="px-6 py-4 text-slate-600 font-medium">{it.function || "-"}</td>
                         <td className="px-6 py-4 text-center font-semibold text-slate-700">
-                          {it.usage_count ?? 0} kali
+                          {it.usage_count ?? 0} times
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-4">

@@ -22,7 +22,7 @@ interface ContentProps {
 
 const viewLabels: Record<DashboardView, string> = {
   overview: "Overview",
-  analyses: "Analyses",
+  analyses: "Analysis",
   users: "Users",
   products: "Products",
   ingredients: "Ingredients",
@@ -131,16 +131,16 @@ function Overview({ data }: { data: DermifyDashboardData }) {
       <section className="grid h-48 grid-cols-1 gap-4 md:h-40 lg:h-44 lg:grid-cols-4">
         <Link href="/analyses" className="block h-full">
           <StatCard
-            label="Total analyses"
+            label="Total Analysis"
             value={formatNumber(analysis.total)}
-            detail={`${formatNumber(analysis.last_24h)} scan masuk 24 jam terakhir`}
+            detail={`${formatNumber(analysis.last_24h)} scans entered in the last 24 hours`}
           />
         </Link>
         <Link href="/users" className="block h-full">
           <StatCard
             label="Users"
             value={formatNumber(entities.users)}
-            detail="Total akun yang tersimpan di platform"
+            detail="Total accounts stored in the platform"
           />
         </Link>
         <Link href="/ingredients" className="block h-full">
@@ -154,7 +154,7 @@ function Overview({ data }: { data: DermifyDashboardData }) {
           <StatCard
             label="Products"
             value={formatNumber(entities.products)}
-            detail={`${formatNumber(entities.scans)} scan dari aplikasi mobile`}
+            detail={`${formatNumber(entities.scans)} scans from the mobile app`}
           />
         </Link>
       </section>
@@ -164,10 +164,10 @@ function Overview({ data }: { data: DermifyDashboardData }) {
           <div className="grid grid-cols-1">
             <div className="p-6">
               <h1 className="mt-3 max-w-2xl text-3xl font-bold text-slate-950">
-                Pantau performa analisis skincare.
+                Monitor skincare analysis performance.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Pantau aktivitas pengguna, hasil analisis, dan perkembangan database ingredient Dermify.
+                Monitor user activities, analysis results, and ingredient database developments.
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <MiniMetric label="Completed" value={`${completedRate}%`} />
@@ -199,7 +199,7 @@ function Overview({ data }: { data: DermifyDashboardData }) {
               ))}
             </div>
           ) : (
-            <EmptyState label="Belum ada hasil analisis terbaru." />
+            <EmptyState label="No recent analysis results available." />
           )}
         </Panel>
         <Panel title="Top ingredients">
@@ -377,11 +377,11 @@ function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?
           <button
             key="del"
             onClick={async () => {
-              if (!confirm("Hapus produk ini?")) return;
+              if (!confirm("Delete this product?")) return;
               try {
                 await onDelete(item.id);
               } catch (err: any) {
-                alert(err?.message || "Gagal menghapus produk");
+                alert(err?.message || "Failed to delete product");
               }
             }}
             className="text-rose-600"
@@ -423,11 +423,11 @@ function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onD
           <button
             key="del"
             onClick={async () => {
-              if (!confirm("Hapus ingredient ini?")) return;
+              if (!confirm("Delete this ingredient?")) return;
               try {
                 await onDelete(item.id);
               } catch (err: any) {
-                alert(err?.message || "Gagal menghapus ingredient");
+                alert(err?.message || "Failed to delete ingredient");
               }
             }}
             className="text-rose-600"
@@ -446,7 +446,7 @@ function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onD
 
 function HistoriesTable({ data }: { data: DermifyDashboardData }) {
   if (!data.histories.length) {
-    return <EmptyState label="Tidak ada data history tersimpan." />;
+    return <EmptyState label="No history data available." />;
   }
 
   return (
@@ -521,12 +521,12 @@ function DataView({
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-950">{title}</h1>
-          <p className="mt-2 text-sm text-slate-500">Kelola dan tinjau data operasional Dermify.</p>
+          <p className="mt-2 text-sm text-slate-500">Manage and review Dermify operational data.</p>
         </div>
         {activeView === "products" && (
           <div>
             <Link href="/admin/products/create" className="rounded bg-emerald-500 px-3 py-1 text-white">
-              Buat Produk
+              Create Product
             </Link>
           </div>
         )}
@@ -540,7 +540,7 @@ function DataView({
           // After delete, refresh page to fetch new data
           location.reload();
         } catch (err: any) {
-          alert(err?.message || "Gagal menghapus produk");
+          alert(err?.message || "Failed to delete product");
         }
       }} />}
       {activeView === "ingredients" && <IngredientsTable items={data.ingredients} onDelete={async (id: number) => {
@@ -548,7 +548,7 @@ function DataView({
           await deleteIngredient(id);
           location.reload();
         } catch (err: any) {
-          alert(err?.message || "Gagal menghapus ingredient");
+          alert(err?.message || "Failed to delete ingredient");
         }
       }} />}
       {activeView === "histories" && <HistoriesTable data={data} />}
@@ -599,24 +599,24 @@ export function Content({ initialView = "overview" }: ContentProps) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="mt-2 text-3xl font-bold text-slate-950">
-            Ringkasan platform
+            Platform Summary
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Pantau aktivitas pengguna, hasil analisis, dan perkembangan database ingredient Dermify.  
+            Monitor user activities, analysis results, and ingredient database developments.
           </p>
         </div>
       </div>
 
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Data platform belum dapat dimuat. Pastikan layanan Dermify aktif,
-          kemudian muat ulang halaman.
+          Platform data could not be loaded. Please ensure the Dermify service is active,
+          then reload the page.
         </div>
       )}
 
       {isLoading ? (
         <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-          Memuat data platform...
+          Loading platform data...
         </div>
       ) : (
         <DataView activeView={initialView} data={data} />

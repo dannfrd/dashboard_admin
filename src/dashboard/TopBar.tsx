@@ -66,23 +66,6 @@ export function TopBar() {
             API Connected
           </span>
 
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            title="Notifikasi"
-            className="relative flex h-10 w-10 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
-          </button>
-
           <div ref={profileRef} className="relative">
             <button
               type="button"

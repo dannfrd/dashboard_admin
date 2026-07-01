@@ -263,7 +263,7 @@ export async function deleteProduct(productId: number) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data && data.detail) || "Gagal menghapus produk");
+    throw new Error((data && data.detail) || "Failed to delete product");
   }
 
   return data;
@@ -454,7 +454,7 @@ export async function createNotification(payload: NotificationCreateRequest) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data && data.detail) || "Gagal membuat notifikasi");
+    throw new Error((data && data.detail) || "failed to create notification");
   }
 
   return data as { id: number; sent?: boolean; response?: any };
@@ -501,7 +501,7 @@ export async function sendStoredNotification(notificationId: number) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data && data.detail) || "Gagal mengirim notifikasi");
+    throw new Error((data && data.detail) || "Failed to send notification");
   }
 
   return data;
@@ -575,7 +575,7 @@ export async function updateNotification(notificationId: number, payload: Notifi
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data && data.detail) || "Gagal memperbarui notifikasi");
+    throw new Error((data && data.detail) || "Failed to update notification");
   }
 
   return data as { id: number; sent?: boolean; response?: any };
@@ -589,7 +589,7 @@ export async function deleteNotification(notificationId: number) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error((data && data.detail) || "Gagal menghapus notifikasi");
+    throw new Error((data && data.detail) || "Failed to delete notification");
   }
 
   return data;

@@ -22,25 +22,25 @@ export default function AdminNotificationsPage() {
   }, [load]);
 
   async function handleSend(id: number) {
-    if (!confirm("Kirim notifikasi sekarang ke target user?")) return;
+    if (!confirm("Send this notification to target users now?")) return;
     setSendingId(id);
     try {
       await sendStoredNotification(id);
       load();
     } catch (err: any) {
-      alert(err?.message || "Gagal mengirim");
+      alert(err?.message || "Failed to send notification");
     } finally {
       setSendingId(null);
     }
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Hapus notifikasi ini secara permanen dari sistem?")) return;
+    if (!confirm("Delete this notification permanently from the system?")) return;
     try {
       await deleteNotification(id);
       load();
     } catch (err: any) {
-      alert(err?.message || "Gagal menghapus notifikasi");
+      alert(err?.message || "Failed to delete notification");
     }
   }
 
@@ -92,9 +92,9 @@ export default function AdminNotificationsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
-            Manajemen Notifikasi
+            Notification Management
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Buat, kelola, dan kirimkan push notification ke device pengguna aplikasi mobile Anda.</p>
+          <p className="text-sm text-slate-500 mt-1">Create, manage, and send push notifications to your mobile app users.</p>
         </div>
         <Link
           href="/admin/notifications/create"
@@ -103,7 +103,7 @@ export default function AdminNotificationsPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Buat Notifikasi
+          Create Notification
         </Link>
       </div>
 
@@ -113,7 +113,7 @@ export default function AdminNotificationsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Terkirim</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Sent</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.sent}</h3>
             </div>
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
@@ -129,7 +129,7 @@ export default function AdminNotificationsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Dijadwalkan</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Scheduled</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.scheduled}</h3>
             </div>
             <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
@@ -161,7 +161,7 @@ export default function AdminNotificationsPage() {
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Gagal</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Failed</p>
               <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.failed}</h3>
             </div>
             <div className="rounded-xl bg-rose-50 p-3 text-rose-600">
@@ -187,7 +187,7 @@ export default function AdminNotificationsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari berdasarkan judul atau pesan..."
+            placeholder="Search by title or message..."
             className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
           />
         </div>
@@ -206,7 +206,7 @@ export default function AdminNotificationsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/50 bg-white p-20 shadow-sm text-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="mt-4 text-sm text-slate-500 font-medium">Memuat data notifikasi...</p>
+          <p className="mt-4 text-sm text-slate-500 font-medium">Loading notification data...</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all">
@@ -215,18 +215,18 @@ export default function AdminNotificationsPage() {
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-6 py-4">ID</th>
-                  <th className="px-6 py-4">Notifikasi</th>
+                  <th className="px-6 py-4">Notification</th>
                   <th className="px-6 py-4">Target</th>
                   <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4">Jadwal / Kirim</th>
-                  <th className="px-6 py-4 text-center">Aksi</th>
+                  <th className="px-6 py-4">Schedule / Send</th>
+                  <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredItems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-400">
-                      {searchQuery ? "Tidak menemukan hasil yang cocok." : "Belum ada riwayat notifikasi."}
+                      {searchQuery ? "No matching results found." : "No notification history available."}
                     </td>
                   </tr>
                 ) : (
@@ -278,17 +278,17 @@ export default function AdminNotificationsPage() {
                         <td className="px-6 py-4 text-xs space-y-0.5">
                           {it.status === "sent" ? (
                             <div>
-                              <span className="text-slate-400">Terkirim:</span>
+                              <span className="text-slate-400">Sent:</span>
                               <div className="font-semibold text-slate-700">{formatDate(it.sent_at)}</div>
                             </div>
                           ) : it.scheduled_at ? (
                             <div>
-                              <span className="text-slate-400">Jadwal:</span>
+                              <span className="text-slate-400">Scheduled:</span>
                               <div className="font-semibold text-slate-700">{formatDate(it.scheduled_at)}</div>
                             </div>
                           ) : (
                             <div>
-                              <span className="text-slate-400">Dibuat:</span>
+                              <span className="text-slate-400">Created:</span>
                               <div className="font-semibold text-slate-700">{formatDate(it.created_at)}</div>
                             </div>
                           )}
@@ -326,7 +326,7 @@ export default function AdminNotificationsPage() {
                                   {sendingId === it.id ? (
                                     <>
                                       <div className="w-3.5 h-3.5 border-2 border-slate-300 border-t-indigo-600 rounded-full animate-spin"></div>
-                                      Kirim...
+                                      Send...
                                     </>
                                   ) : (
                                     <>

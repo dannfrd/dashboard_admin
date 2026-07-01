@@ -26,7 +26,7 @@ export default function ViewNotificationPage() {
     setLoading(true);
     getNotification(noteId)
       .then((n) => setNote(n))
-      .catch((err: any) => alert(err?.message || "Gagal memuat notifikasi"))
+      .catch((err: any) => alert(err?.message || "failed to load notification details"))
       .finally(() => setLoading(false));
   }, [noteId]);
 
@@ -36,7 +36,7 @@ export default function ViewNotificationPage() {
 
   async function handleSend() {
     if (!noteId) return;
-    if (!confirm("Kirim notifikasi ini sekarang ke target user?")) return;
+    if (!confirm("Send this notification now to the target users?")) return;
     setSending(true);
     try {
       await sendStoredNotification(noteId);
@@ -44,7 +44,7 @@ export default function ViewNotificationPage() {
       const n = await getNotification(noteId);
       setNote(n);
     } catch (err: any) {
-      alert(err?.message || "Gagal mengirim notifikasi");
+      alert(err?.message || "Failed to send notification");
     } finally {
       setSending(false);
     }
@@ -72,7 +72,7 @@ export default function ViewNotificationPage() {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-center">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-sm text-slate-500 font-medium">Memuat rincian notifikasi...</p>
+        <p className="mt-4 text-sm text-slate-500 font-medium">Loading notification details...</p>
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function ViewNotificationPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-slate-900">Rincian Notifikasi #{note?.id}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Notification Details #{note?.id}</h1>
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full border ${statusClass}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
             {note?.status?.toUpperCase()}
@@ -107,7 +107,7 @@ export default function ViewNotificationPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali
+          Back
         </Link>
       </div>
 
@@ -120,20 +120,20 @@ export default function ViewNotificationPage() {
             {/* Title & Body Card */}
             <div className="space-y-4">
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Judul Pesan</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Title</span>
                 <p className="text-base font-semibold text-slate-900 mt-0.5">{note?.title}</p>
               </div>
               
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Isi Pesan (Body)</span>
-                <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap leading-relaxed">{note?.body || <span className="text-slate-400 italic">Tidak ada isi pesan</span>}</p>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Message Body</span>
+                <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap leading-relaxed">{note?.body || <span className="text-slate-400 italic">No message content</span>}</p>
               </div>
             </div>
 
             {/* Target & Scheduling Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-5">
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Target Penerima</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Target Recipients</span>
                 <div className="mt-1.5">
                   {note?.topic ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 text-teal-700 border border-teal-100/50">
@@ -150,26 +150,26 @@ export default function ViewNotificationPage() {
                       {note.tokens.length} Devices
                     </span>
                   ) : (
-                    <span className="text-sm text-slate-500">Semua User (Global)</span>
+                    <span className="text-sm text-slate-500">All Users (Global)</span>
                   )}
                 </div>
               </div>
 
               <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Waktu Dibuat</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Created</span>
                 <p className="text-sm font-medium text-slate-700 mt-1">{formatDate(note?.created_at)}</p>
               </div>
 
               {note?.scheduled_at && (
                 <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Waktu Dijadwalkan</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Scheduled Time</span>
                   <p className="text-sm font-medium text-slate-700 mt-1">{formatDate(note.scheduled_at)}</p>
                 </div>
               )}
 
               {note?.sent_at && (
                 <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Waktu Terkirim</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sent Time</span>
                   <p className="text-sm font-semibold text-emerald-600 mt-1">{formatDate(note.sent_at)}</p>
                 </div>
               )}
@@ -185,7 +185,7 @@ export default function ViewNotificationPage() {
                   </pre>
                 </div>
               ) : (
-                <p className="text-sm text-slate-400 italic">Tidak ada data tambahan yang disematkan.</p>
+                <p className="text-sm text-slate-400 italic">No additional data attached.</p>
               )}
             </div>
 
@@ -210,14 +210,14 @@ export default function ViewNotificationPage() {
                   {sending ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Mengirim...
+                      Sending...
                     </>
                   ) : (
                     <>
                       <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
-                      Kirim Notifikasi Sekarang
+                      Send Notification Now
                     </>
                   )}
                 </button>
@@ -229,7 +229,7 @@ export default function ViewNotificationPage() {
         {/* Mock Preview Column */}
         <div className="lg:col-span-5">
           <div className="sticky top-6">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Tampilan Notifikasi di Handphone</h3>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Notification Preview on Phone</h3>
 
             {/* Phone Frame */}
             <div className="relative mx-auto max-w-[300px] aspect-[9/18.5] rounded-[38px] border-[6px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden ring-4 ring-slate-900/5">
@@ -273,12 +273,12 @@ export default function ViewNotificationPage() {
                         </div>
                         <span className="text-[10px] font-bold tracking-wide uppercase text-slate-600">Dermify</span>
                       </div>
-                      <span className="text-[9px] text-slate-500 font-medium">Baru saja</span>
+                      <span className="text-[9px] text-slate-500 font-medium">New</span>
                     </div>
 
                     <div className="space-y-0.5">
                       <h4 className="text-xs font-bold text-slate-900 break-words leading-tight">{note?.title}</h4>
-                      <p className="text-[10px] text-slate-600 break-words leading-snug">{note?.body || <span className="text-slate-400 italic">Tidak ada isi pesan</span>}</p>
+                      <p className="text-[10px] text-slate-600 break-words leading-snug">{note?.body || <span className="text-slate-400 italic">No message content</span>}</p>
                     </div>
                   </div>
                 </div>
