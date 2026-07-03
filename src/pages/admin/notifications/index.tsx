@@ -214,7 +214,7 @@ export default function AdminNotificationsPage() {
             <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">No</th>
                   <th className="px-6 py-4">Notification</th>
                   <th className="px-6 py-4">Target</th>
                   <th className="px-6 py-4 text-center">Status</th>
@@ -230,7 +230,7 @@ export default function AdminNotificationsPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map((it) => {
+                  filteredItems.map((it, index) => {
                     const statusClass = 
                       it.status === "sent" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
                       it.status === "scheduled" ? "bg-blue-50 text-blue-700 border-blue-100" :
@@ -245,7 +245,7 @@ export default function AdminNotificationsPage() {
 
                     return (
                       <tr key={it.id} className="transition-colors hover:bg-slate-50/50">
-                        <td className="px-6 py-4 font-mono text-xs text-slate-400">#{it.id}</td>
+                        <td className="px-6 py-4 font-mono text-xs text-slate-400">{index + 1}</td>
                         <td className="px-6 py-4 max-w-xs sm:max-w-md">
                           <div className="font-semibold text-slate-900 truncate">{it.title}</div>
                           {it.body && <div className="text-xs text-slate-400 line-clamp-2 mt-0.5">{it.body}</div>}

@@ -1,17 +1,23 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { getDermifyDashboardData, DermifyIngredient, deleteIngredient } from "@/lib/dermifyApi";
+import {
+  deleteIngredient,
+  DermifyIngredient,
+  getMetricsIngredients,
+} from "@/lib/dermifyApi";
 
 export default function AdminIngredientsPage() {
   const [items, setItems] = useState<DermifyIngredient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const load = React.useCallback(() => {
     setIsLoading(true);
-    getDermifyDashboardData("ingredients")
-      .then((data) => setItems(data.ingredients || []))
+    getMetricsIngredients()
+      .then((data) => setItems(data || []))
       .catch((err: Error) => setError(err.message))
       .finally(() => setIsLoading(false));
   }, []);
@@ -43,15 +49,30 @@ export default function AdminIngredientsPage() {
     );
   }, [items, searchQuery]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredItems.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, filteredItems]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   // Calculate statistics (removing risk metrics, replacing with usage counters)
   const stats = useMemo(() => {
     const total = items.length;
-    const totalUsage = items.reduce((sum, it) => sum + (it.usage_count || 0), 0);
-    const averageUsage = total > 0 ? (totalUsage / total).toFixed(1) : "0";
-    const activeCount = items.filter((it) => (it.usage_count || 0) > 0).length;
-    const inactiveCount = total - activeCount;
+    const withDescription = items.filter((it) => !!it.description?.trim()).length;
+    const withRiskLevel = items.filter((it) => !!it.risk_level?.trim()).length;
+    const withoutDescription = total - withDescription;
 
-    return { total, averageUsage, activeCount, inactiveCount };
+    return { total, withDescription, withRiskLevel, withoutDescription };
   }, [items]);
 
   return (
@@ -95,48 +116,48 @@ export default function AdminIngredientsPage() {
           <div className="absolute bottom-0 left-0 h-1 w-full bg-slate-400" />
         </div>
 
-        {/* Average Usage */}
+        {/* Ingredients With Description */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Average Usage</p>
-              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.averageUsage}</h3>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">With Description</p>
+              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.withDescription}</h3>
             </div>
             <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-２a２ ２ ０ ０１－２ －２z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z" />
               </svg>
             </div>
           </div>
           <div className="absolute bottom-0 left-0 h-1 w-full bg-blue-500" />
         </div>
 
-        {/* Active Ingredients */}
+        {/* Ingredients With Risk Level */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Ingredients</p>
-              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.activeCount}</h3>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">With Risk Level</p>
+              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.withRiskLevel}</h3>
             </div>
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2l9 4.5v6c0 5.2-3.4 10-9 10S3 17.7 3 12.5v-6L12 2z" />
               </svg>
             </div>
           </div>
           <div className="absolute bottom-0 left-0 h-1 w-full bg-emerald-500" />
         </div>
 
-        {/* Inactive Ingredients */}
+        {/* Missing Description */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Inactive Ingredients</p>
-              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.inactiveCount}</h3>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Missing Description</p>
+              <h3 className="mt-1 text-2xl font-bold text-slate-900">{stats.withoutDescription}</h3>
             </div>
             <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v4m0 4h.01M10.29 3.86l-8.2 14.2A2 2 0 003.82 21h16.36a2 2 0 001.73-2.94l-8.2-14.2a2 2 0 00-3.46 0z" />
               </svg>
             </div>
           </div>
@@ -184,29 +205,31 @@ export default function AdminIngredientsPage() {
             <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">No</th>
                   <th className="px-6 py-4">Ingredient Name</th>
-                  <th className="px-6 py-4">Main Function</th>
-                  <th className="px-6 py-4 text-center">Usage Frequency</th>
+                  <th className="px-6 py-4">Description</th>
                   <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredItems.length === 0 ? (
+                {paginatedItems.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-400">
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-400">
                       {searchQuery ? "Didn't find any matching results." : "No ingredient data available."}
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map((it) => {
+                  paginatedItems.map((it, index) => {
+                    const displayNumber = (currentPage - 1) * pageSize + index + 1;
+
                     return (
                       <tr key={it.id} className="transition-colors hover:bg-slate-50/50">
-                        <td className="px-6 py-4 font-mono text-xs text-slate-400">#{it.id}</td>
+                        <td className="px-6 py-4 font-mono text-xs text-slate-400">{displayNumber}</td>
                         <td className="px-6 py-4 font-semibold text-slate-900">{it.name || "-"}</td>
-                        <td className="px-6 py-4 text-slate-600 font-medium">{it.function || "-"}</td>
-                        <td className="px-6 py-4 text-center font-semibold text-slate-700">
-                          {it.usage_count ?? 0} times
+                        <td className="px-6 py-4 text-slate-600">
+                          <span className="block max-w-xs truncate" title={it.description || ""}>
+                            {it.description || "-"}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-4">
@@ -234,6 +257,39 @@ export default function AdminIngredientsPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {filteredItems.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            <span className="font-semibold text-slate-900">
+              {Math.min(currentPage * pageSize, filteredItems.length)}
+            </span>{' '}
+            of <span className="font-semibold text-slate-900">{filteredItems.length}</span> ingredients
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}
