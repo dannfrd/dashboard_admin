@@ -51,6 +51,7 @@ export type DermifyProduct = {
 export type DermifyIngredient = {
   id: number;
   name?: string | null;
+  description?: string | null;
   function?: string | null;
   risk_level?: string | null;
   usage_count: number;
@@ -121,19 +122,7 @@ function getHeaders(): Record<string, string> | undefined {
   const token = getStoredAdminToken();
 
   if (token) {
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-
-    // Optionally include monitoring API key from public env for dev/testing
-    // Use NEXT_PUBLIC_MONITORING_API_KEY in .env to expose to client if needed
-    try {
-      // process.env is replaced at build-time by Next.js for NEXT_PUBLIC_* vars
-      const publicKey = process.env.NEXT_PUBLIC_MONITORING_API_KEY;
-      if (publicKey) {
-        headers["X-Api-Key"] = String(publicKey);
-      }
-    } catch {}
-
-    return headers;
+    return { Authorization: `Bearer ${token}` };
   }
 
   // If no admin token, still allow X-Api-Key from public env (optional)
@@ -616,21 +605,21 @@ export async function getDermifyDashboardData(
   if (view === "analyses") {
     return {
       ...data,
-      analyses: await getJson<DermifyAnalysis[]>("/metrics/analyses?limit=200"),
+      analyses: await getJson<DermifyAnalysis[]>("/metrics/analyses?limit=1000"),
     };
   }
 
   if (view === "users") {
     return {
       ...data,
-      users: await getJson<DermifyUser[]>("/metrics/users?limit=200"),
+      users: await getJson<DermifyUser[]>("/metrics/users?limit=1000"),
     };
   }
 
   if (view === "products") {
     return {
       ...data,
-      products: await getJson<DermifyProduct[]>("/metrics/products?limit=200"),
+      products: await getJson<DermifyProduct[]>("/metrics/products?limit=1000"),
     };
   }
 
@@ -638,17 +627,19 @@ export async function getDermifyDashboardData(
     return {
       ...data,
       ingredients: await getJson<DermifyIngredient[]>(
-        "/metrics/ingredients?limit=200",
+        "/metrics/ingredients?limit=1000",
       ),
     };
   }
 
   return {
     ...data,
-    histories: await getJson<DermifyHistory[]>(
-      "/metrics/user-histories?limit=200",
-    ),
+    histories: await getJson<DermifyHistory[]>("/metrics/user-histories?limit=1000"),
   };
+}
+
+export async function getMetricsIngredients(): Promise<DermifyIngredient[]> {
+  return getJson<DermifyIngredient[]>("/metrics/ingredients?limit=1000");
 }
 
 export const sampleDermifyDashboardData: DermifyDashboardData = {

@@ -7,6 +7,8 @@ export default function AdminProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const load = React.useCallback(() => {
     setIsLoading(true);
@@ -43,6 +45,22 @@ export default function AdminProductsPage() {
         (p.category && p.category.toLowerCase().includes(query))
     );
   }, [products, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredProducts.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, filteredProducts]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -184,7 +202,7 @@ export default function AdminProductsPage() {
             <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
               <thead className="bg-slate-50/75 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">No</th>
                   <th className="px-6 py-4">Product Name</th>
                   <th className="px-6 py-4">Brand</th>
                   <th className="px-6 py-4">Category</th>
@@ -193,16 +211,18 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredProducts.length === 0 ? (
+                {paginatedProducts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-400">
                       {searchQuery ? "Tidak menemukan hasil produk yang cocok." : "Belum ada data produk."}
                     </td>
                   </tr>
                 ) : (
-                  filteredProducts.map((p) => (
+                  paginatedProducts.map((p, index) => (
                     <tr key={p.id} className="transition-colors hover:bg-slate-50/50">
-                      <td className="px-6 py-4 font-mono text-xs text-slate-400">#{p.id}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                        {(currentPage - 1) * pageSize + index + 1}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{p.name || "-"}</div>
                         {p.barcode && <div className="text-xs text-slate-400 font-mono mt-0.5">Barcode: {p.barcode}</div>}
@@ -245,6 +265,39 @@ export default function AdminProductsPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {filteredProducts.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            <span className="font-semibold text-slate-900">
+              {Math.min(currentPage * pageSize, filteredProducts.length)}
+            </span>{' '}
+            of <span className="font-semibold text-slate-900">{filteredProducts.length}</span> products
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

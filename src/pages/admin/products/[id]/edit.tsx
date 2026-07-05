@@ -138,7 +138,7 @@ export default function EditProductPage() {
             type="text"
             value={barcode} 
             onChange={(e) => setBarcode(e.target.value)} 
-            placeholder="Example: 899000000001"
+            placeholder="Example;: 899000000001"
             className="mt-1.5 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono"
           />
         </div>

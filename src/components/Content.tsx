@@ -62,6 +62,93 @@ function formatDate(value?: string | null) {
   }).format(date);
 }
 
+function PaginationBar({
+  label,
+  currentPage,
+  totalPages,
+  startItem,
+  endItem,
+  totalItems,
+  onPrevious,
+  onNext,
+}: {
+  label: string;
+  currentPage: number;
+  totalPages: number;
+  startItem: number;
+  endItem: number;
+  totalItems: number;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  if (!totalItems) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-slate-200/70 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-slate-500">
+        Showing <span className="font-semibold text-slate-900">{startItem}</span> to{' '}
+        <span className="font-semibold text-slate-900">{endItem}</span> of{' '}
+        <span className="font-semibold text-slate-900">{formatNumber(totalItems)}</span> {label}
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={currentPage === 1}
+          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={currentPage === totalPages}
+          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function usePagedItems<T>(items: T[], pageSize = 10) {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+
+  const paginatedItems = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return items.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, items, pageSize]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [items.length]);
+
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const startItem = items.length ? (currentPage - 1) * pageSize + 1 : 0;
+  const endItem = Math.min(currentPage * pageSize, items.length);
+
+  return {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+  };
+}
+
 function Badge({ value }: { value?: string | null }) {
   const normalized = (value || "unknown").toLowerCase();
   const className = statusColor[normalized] || statusColor.unknown;
@@ -312,57 +399,111 @@ function AnalysisRow({ item }: { item: DermifyAnalysis }) {
 }
 
 function AnalysesTable({ items }: { items: DermifyAnalysis[] }) {
+  const pageSize = 10;
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+  } = usePagedItems(items, pageSize);
+
   if (!items.length) {
     return <EmptyState label="Tidak ada data analysis." />;
   }
 
   return (
-    <Table
-      headers={["ID", "Product", "User", "Ingredients", "Status", "Created"]}
-      rows={items.map((item) => [
-        `#${item.id}`,
-        item.product?.name || "-",
-        item.user?.name || item.user?.email || "-",
-        formatNumber(item.matched_ingredient_count),
-        <Badge key="status" value={item.status} />,
-        formatDate(item.created_at),
-      ])}
-    />
+    <div className="space-y-4">
+      <Table
+        headers={["No", "Product", "User", "Ingredients", "Status", "Created"]}
+        rows={paginatedItems.map((item, index) => [
+          String((currentPage - 1) * pageSize + index + 1),
+          item.product?.name || "-",
+          item.user?.name || item.user?.email || "-",
+          formatNumber(item.matched_ingredient_count),
+          <Badge key="status" value={item.status} />,
+          formatDate(item.created_at),
+        ])}
+      />
+      <PaginationBar
+        label="analyses"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startItem={startItem}
+        endItem={endItem}
+        totalItems={items.length}
+        onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+      />
+    </div>
   );
 }
 
 function UsersTable({ items }: { items: DermifyUser[] }) {
+  const pageSize = 10;
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+  } = usePagedItems(items, pageSize);
+
   if (!items.length) {
     return <EmptyState label="Tidak ada data user." />;
   }
 
   return (
-    <Table
-      headers={["ID", "Name", "Email", "Provider", "Role", "Analyses", "Joined"]}
-      rows={items.map((item) => [
-        `#${item.id}`,
-        item.name || "-",
-        item.email || "-",
-        item.provider || "-",
-        item.role || "-",
-        formatNumber(item.analysis_count),
-        formatDate(item.created_at),
-      ])}
-    />
+    <div className="space-y-4">
+      <Table
+        headers={["No", "Name", "Email", "Provider", "Role", "Analyses", "Joined"]}
+        rows={paginatedItems.map((item, index) => [
+          String((currentPage - 1) * pageSize + index + 1),
+          item.name || "-",
+          item.email || "-",
+          item.provider || "-",
+          item.role || "-",
+          formatNumber(item.analysis_count),
+          formatDate(item.created_at),
+        ])}
+      />
+      <PaginationBar
+        label="users"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startItem={startItem}
+        endItem={endItem}
+        totalItems={items.length}
+        onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+      />
+    </div>
   );
 }
 
 function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?: (id: number) => Promise<void> }) {
+  const pageSize = 10;
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+  } = usePagedItems(items, pageSize);
+
   if (!items.length) {
     return <EmptyState label="Tidak ada data product." />;
   }
 
-  const headers = ["ID", "Product", "Brand", "Category", "Scans", "Analyses"];
+  const headers = ["No", "Product", "Brand", "Category", "Scans", "Analyses"];
   if (onDelete) headers.push("Actions");
 
-  const rows = items.map((item) => {
+  const rows = paginatedItems.map((item, index) => {
     const base = [
-      `#${item.id}`,
+      String((currentPage - 1) * pageSize + index + 1),
       item.name || "-",
       item.brand || "-",
       item.category || "-",
@@ -395,7 +536,21 @@ function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?
     return base;
   });
 
-  return <Table headers={headers} rows={rows} />;
+  return (
+    <div className="space-y-4">
+      <Table headers={["No", "Product", "Brand", "Category", "Scans", "Analyses", ...(onDelete ? ["Actions"] : [])]} rows={rows} />
+      <PaginationBar
+        label="products"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startItem={startItem}
+        endItem={endItem}
+        totalItems={items.length}
+        onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+      />
+    </div>
+  );
 }
 
 function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onDelete?: (id: number) => Promise<void> }) {
@@ -419,7 +574,9 @@ function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onD
     if (onDelete) {
       base.push(
         <div className="flex gap-3">
-          <Link key="edit" href={`/admin/ingredients/${item.id}/edit`} className="text-emerald-600">Edit</Link>
+          <Link key="edit" href={`/admin/ingredients/${item.id}/edit`} className="text-emerald-600">
+            Edit
+          </Link>
           <button
             key="del"
             onClick={async () => {
@@ -445,21 +602,54 @@ function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onD
 }
 
 function HistoriesTable({ data }: { data: DermifyDashboardData }) {
+  const items = data.histories;
+  const pageSize = 10;
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    startItem,
+    endItem,
+    setCurrentPage,
+  } = usePagedItems(items, pageSize);
+
   if (!data.histories.length) {
     return <EmptyState label="No history data available." />;
   }
 
   return (
-    <Table
-      headers={["ID", "User", "Analysis", "Status", "Viewed"]}
-      rows={data.histories.map((item) => [
-        `#${item.id}`,
-        item.user_name || item.user_email || "-",
-        item.analysis_id ? `#${item.analysis_id}` : "-",
-        <Badge key="history-status" value={item.analysis_status} />,
-        formatDate(item.viewed_at),
-      ])}
-    />
+    <div className="space-y-4">
+      <PaginationBar
+        label="history records"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startItem={startItem}
+        endItem={endItem}
+        totalItems={items.length}
+        onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+      />
+      <Table
+        headers={["No", "User", "Analysis", "Status", "Viewed"]}
+        rows={paginatedItems.map((item, index) => [
+          String((currentPage - 1) * pageSize + index + 1),
+          item.user_name || item.user_email || "-",
+          item.analysis_id ? `#${item.analysis_id}` : "-",
+          <Badge key="history-status" value={item.analysis_status} />,
+          formatDate(item.viewed_at),
+        ])}
+      />
+      <PaginationBar
+        label="history records"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startItem={startItem}
+        endItem={endItem}
+        totalItems={items.length}
+        onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+      />
+    </div>
   );
 }
 
