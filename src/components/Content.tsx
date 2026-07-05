@@ -88,8 +88,8 @@ function PaginationBar({
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-slate-200/70 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-slate-500">
-        Showing <span className="font-semibold text-slate-900">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-900">{endItem}</span> of{' '}
+        Showing <span className="font-semibold text-slate-900">{startItem}</span> to{" "}
+        <span className="font-semibold text-slate-900">{endItem}</span> of{" "}
         <span className="font-semibold text-slate-900">{formatNumber(totalItems)}</span> {label}
       </p>
       <div className="flex items-center gap-2">

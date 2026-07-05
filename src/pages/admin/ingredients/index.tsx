@@ -264,10 +264,10 @@ export default function AdminIngredientsPage() {
       {filteredItems.length > 0 && (
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-slate-500">
-            Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{" "}
             <span className="font-semibold text-slate-900">
               {Math.min(currentPage * pageSize, filteredItems.length)}
-            </span>{' '}
+            </span>{" "}
             of <span className="font-semibold text-slate-900">{filteredItems.length}</span> ingredients
           </p>
           <div className="flex items-center gap-2">
