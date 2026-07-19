@@ -10,9 +10,12 @@ import {
   FormActions,
   inputClassName,
   textareaClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function CreateIngredientPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [fn, setFn] = useState("");
@@ -22,7 +25,8 @@ export default function CreateIngredientPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Buat ingredient baru ini?")) return;
+    const ok = await confirm("Buat ingredient baru ini?");
+    if (!ok) return;
     if (!name.trim()) {
       setError("Nama ingredient wajib diisi.");
       return;
@@ -98,6 +102,7 @@ export default function CreateIngredientPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

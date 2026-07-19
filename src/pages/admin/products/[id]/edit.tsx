@@ -11,9 +11,12 @@ import {
   FormActions,
   inputClassName,
   LoadingPanel,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function EditProductPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const { id } = router.query;
   const productId = Number(id);
@@ -48,7 +51,8 @@ export default function EditProductPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Simpan perubahan data produk ini?")) return;
+    const ok = await confirm("Simpan perubahan data produk ini?");
+    if (!ok) return;
     if (!productId) return;
 
     if (!name.trim()) {
@@ -78,7 +82,8 @@ export default function EditProductPage() {
     return (
       <AdminPageShell maxWidth="max-w-2xl">
         <LoadingPanel label="Memuat detail produk..." />
-      </AdminPageShell>
+        <ConfirmDialog />
+    </AdminPageShell>
     );
   }
 
@@ -164,6 +169,7 @@ export default function EditProductPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

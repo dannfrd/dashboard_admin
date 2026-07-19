@@ -10,9 +10,12 @@ import {
   FieldLabel,
   FormActions,
   inputClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function CreateProductPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
@@ -24,7 +27,8 @@ export default function CreateProductPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Buat produk baru ini?")) return;
+    const ok = await confirm("Buat produk baru ini?");
+    if (!ok) return;
     if (!name.trim()) {
       setError("Nama produk wajib diisi.");
       return;
@@ -130,6 +134,7 @@ export default function CreateProductPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

@@ -17,6 +17,7 @@ import {
   PhoneNotificationPreview,
   secondaryButtonClassName,
   textareaClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 type TargetType = "all" | "user";
@@ -49,6 +50,8 @@ function SegmentedButton({
 }
 
 export default function CreateNotificationPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -76,7 +79,8 @@ export default function CreateNotificationPage() {
     event.preventDefault();
     setError(null);
 
-    if (!window.confirm("Apakah Anda yakin ingin membuat dan memproses notifikasi ini?")) {
+    const ok = await confirm("Apakah Anda yakin ingin membuat dan memproses notifikasi ini?");
+    if (!ok) {
       return;
     }
 
@@ -273,6 +277,7 @@ export default function CreateNotificationPage() {
           <PhoneNotificationPreview title={title} body={body.trim() || null} />
         </div>
       </div>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

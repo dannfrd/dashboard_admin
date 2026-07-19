@@ -728,3 +728,54 @@ export function PhoneNotificationPreview({
     </div>
   );
 }
+
+export function useConfirm() {
+  const [promise, setPromise] = React.useState<{
+    resolve: (value: boolean) => void;
+    message: string;
+  } | null>(null);
+
+  const confirm = (message: string) => {
+    return new Promise<boolean>((resolve) => {
+      setPromise({ resolve, message });
+    });
+  };
+
+  const handleConfirm = () => {
+    promise?.resolve(true);
+    setPromise(null);
+  };
+
+  const handleCancel = () => {
+    promise?.resolve(false);
+    setPromise(null);
+  };
+
+  const ConfirmDialog = () => {
+    if (!promise) return null;
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm transition-opacity">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+          <h3 className="text-lg font-bold text-slate-900">Konfirmasi</h3>
+          <div className="mt-2 text-sm text-slate-600">{promise.message}</div>
+          <div className="mt-6 flex flex-row-reverse gap-3">
+            <button
+              onClick={handleConfirm}
+              className={cx(primaryButtonClassName, "min-w-[80px]")}
+            >
+              Oke
+            </button>
+            <button
+              onClick={handleCancel}
+              className={cx(secondaryButtonClassName, "min-w-[80px]")}
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return { confirm, ConfirmDialog };
+}

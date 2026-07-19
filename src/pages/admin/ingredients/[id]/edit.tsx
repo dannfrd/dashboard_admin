@@ -11,9 +11,12 @@ import {
   inputClassName,
   LoadingPanel,
   textareaClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function EditIngredientPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const { id } = router.query;
   const ingredientId = Number(id);
@@ -44,7 +47,8 @@ export default function EditIngredientPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Simpan perubahan data ingredient ini?")) return;
+    const ok = await confirm("Simpan perubahan data ingredient ini?");
+    if (!ok) return;
     if (!ingredientId) return;
 
     if (!name.trim()) {
@@ -72,7 +76,8 @@ export default function EditIngredientPage() {
     return (
       <AdminPageShell maxWidth="max-w-2xl">
         <LoadingPanel label="Memuat detail ingredient..." />
-      </AdminPageShell>
+        <ConfirmDialog />
+    </AdminPageShell>
     );
   }
 
@@ -130,6 +135,7 @@ export default function EditIngredientPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

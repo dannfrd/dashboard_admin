@@ -19,6 +19,7 @@ import {
   PhoneNotificationPreview,
   secondaryButtonClassName,
   textareaClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 type TargetType = "all" | "user";
@@ -63,6 +64,8 @@ function SegmentedButton({
 }
 
 export default function EditNotificationPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const { id } = router.query;
   const noteId = Number(id);
@@ -141,7 +144,8 @@ export default function EditNotificationPage() {
     event.preventDefault();
     setError(null);
 
-    if (!window.confirm("Apakah Anda yakin ingin menyimpan perubahan notifikasi ini?")) {
+    const ok = await confirm("Apakah Anda yakin ingin menyimpan perubahan notifikasi ini?");
+    if (!ok) {
       return;
     }
 
@@ -190,7 +194,8 @@ export default function EditNotificationPage() {
     return (
       <AdminPageShell>
         <LoadingPanel label="Memuat detail notifikasi..." />
-      </AdminPageShell>
+        <ConfirmDialog />
+    </AdminPageShell>
     );
   }
 
@@ -348,6 +353,7 @@ export default function EditNotificationPage() {
           <PhoneNotificationPreview title={title} body={body.trim() || null} />
         </div>
       </div>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

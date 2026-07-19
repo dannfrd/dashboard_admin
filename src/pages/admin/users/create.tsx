@@ -9,9 +9,12 @@ import {
   FieldLabel,
   FormActions,
   inputClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function CreateUserPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +25,8 @@ export default function CreateUserPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Buat user baru ini?")) return;
+    const ok = await confirm("Buat user baru ini?");
+    if (!ok) return;
 
     if (!email.trim()) {
       setError("Email user wajib diisi.");
@@ -113,6 +117,7 @@ export default function CreateUserPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

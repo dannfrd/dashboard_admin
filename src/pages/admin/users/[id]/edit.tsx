@@ -10,9 +10,12 @@ import {
   FormActions,
   inputClassName,
   LoadingPanel,
+  useConfirm,
 } from "@/components/admin/ui";
 
 export default function EditUserPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
+
   const router = useRouter();
   const { id } = router.query;
   const userId = Number(id);
@@ -44,7 +47,8 @@ export default function EditUserPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!window.confirm("Simpan perubahan data user ini?")) return;
+    const ok = await confirm("Simpan perubahan data user ini?");
+    if (!ok) return;
     if (!userId) return;
 
     if (!email.trim()) {
@@ -73,7 +77,8 @@ export default function EditUserPage() {
     return (
       <AdminPageShell maxWidth="max-w-2xl">
         <LoadingPanel label="Memuat detail user..." />
-      </AdminPageShell>
+        <ConfirmDialog />
+    </AdminPageShell>
     );
   }
 
@@ -144,6 +149,7 @@ export default function EditUserPage() {
           />
         </form>
       </AdminCard>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

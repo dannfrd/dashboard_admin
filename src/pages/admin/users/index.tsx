@@ -23,6 +23,7 @@ import {
   StatCard,
   TrashIcon,
   UserIcon,
+  useConfirm,
 } from "@/components/admin/ui";
 
 const pageSize = 10;
@@ -48,6 +49,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = React.useCallback(() => {
     setIsLoading(true);
@@ -63,8 +65,12 @@ export default function AdminUsersPage() {
   }, [load]);
 
   async function handleDelete(id?: number) {
-    if (!id || !window.confirm("Apakah Anda yakin ingin menghapus user ini? Semua data terkait (scan, histori) akan ikut terhapus.")) return;
-    if (!confirm("Hapus user ini secara permanen dari database?")) return;
+    if (!id) return;
+    const ok1 = await confirm("Apakah Anda yakin ingin menghapus user ini? Semua data terkait (scan, histori) akan ikut terhapus.");
+    if (!ok1) return;
+    
+    const ok2 = await confirm("Hapus user ini secara permanen dari database?");
+    if (!ok2) return;
 
     try {
       await deleteUser(id);
@@ -248,6 +254,7 @@ export default function AdminUsersPage() {
         onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }
