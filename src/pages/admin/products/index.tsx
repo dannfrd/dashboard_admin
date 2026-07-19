@@ -7,7 +7,6 @@ import {
 } from "@/lib/dermifyApi";
 import {
   AdminLinkButton,
-  AdminImagePreview,
   AdminPageHeader,
   AdminPageShell,
   AdminTable,
