@@ -21,7 +21,7 @@ import {
   textareaClassName,
 } from "@/components/admin/ui";
 
-type TargetType = "all" | "topic" | "user";
+type TargetType = "all" | "user";
 type SchedulingType = "now" | "schedule";
 type OpenAction = "" | "history" | "scan" | "tips_skincare";
 
@@ -72,7 +72,6 @@ export default function EditNotificationPage() {
   const [openAction, setOpenAction] = useState<OpenAction>("");
   const [extraData, setExtraData] = useState<Record<string, any>>({});
   const [targetType, setTargetType] = useState<TargetType>("all");
-  const [topic, setTopic] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
   const [users, setUsers] = useState<DermifyUser[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -111,13 +110,6 @@ export default function EditNotificationPage() {
         if (targetUserId) {
           setTargetType("user");
           setSelectedUserId(String(targetUserId));
-        } else if (notification.topic) {
-          if (notification.topic === "all") {
-            setTargetType("all");
-          } else {
-            setTargetType("topic");
-            setTopic(notification.topic);
-          }
         } else {
           setTargetType("all");
         }
@@ -149,6 +141,10 @@ export default function EditNotificationPage() {
     event.preventDefault();
     setError(null);
 
+    if (!window.confirm("Apakah Anda yakin ingin menyimpan perubahan notifikasi ini?")) {
+      return;
+    }
+
     if (!title.trim()) {
       setError("Judul notifikasi wajib diisi.");
       return;
@@ -159,12 +155,7 @@ export default function EditNotificationPage() {
     else delete data.screen;
     delete data.discount_code;
 
-    const finalTopic =
-      targetType === "all" ? "all" : targetType === "topic" ? topic.trim() : undefined;
-    if (targetType === "topic" && !finalTopic) {
-      setError("Nama segment wajib diisi jika memilih target segment.");
-      return;
-    }
+    const finalTopic = targetType === "all" ? "all" : undefined;
 
     const userId = selectedUserId ? Number(selectedUserId) : undefined;
     if (targetType === "user" && !userId) {
@@ -243,18 +234,12 @@ export default function EditNotificationPage() {
 
             <div className="space-y-3 border-t border-slate-100 pt-5">
               <FieldLabel>Target Penerima</FieldLabel>
-              <div className="grid grid-cols-3 gap-1 rounded-lg border border-slate-200 bg-slate-100 p-1">
+              <div className="grid grid-cols-2 gap-1 rounded-lg border border-slate-200 bg-slate-100 p-1">
                 <SegmentedButton
                   active={targetType === "all"}
                   onClick={() => setTargetType("all")}
                 >
                   Semua User
-                </SegmentedButton>
-                <SegmentedButton
-                  active={targetType === "topic"}
-                  onClick={() => setTargetType("topic")}
-                >
-                  Segment
                 </SegmentedButton>
                 <SegmentedButton
                   active={targetType === "user"}
@@ -267,19 +252,6 @@ export default function EditNotificationPage() {
               {targetType === "all" && (
                 <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                   Notifikasi akan dikirim ke topic default <strong>all</strong>.
-                </div>
-              )}
-
-              {targetType === "topic" && (
-                <div>
-                  <FieldLabel>Nama Segment</FieldLabel>
-                  <input
-                    type="text"
-                    value={topic}
-                    onChange={(event) => setTopic(event.target.value)}
-                    placeholder="Contoh: tips_skincare, pengguna_baru"
-                    className={inputClassName}
-                  />
                 </div>
               )}
 

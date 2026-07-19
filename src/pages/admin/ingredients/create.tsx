@@ -22,6 +22,7 @@ export default function CreateIngredientPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Buat ingredient baru ini?")) return;
     if (!name.trim()) {
       setError("Nama ingredient wajib diisi.");
       return;

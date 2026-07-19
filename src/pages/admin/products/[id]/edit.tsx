@@ -48,6 +48,7 @@ export default function EditProductPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Simpan perubahan data produk ini?")) return;
     if (!productId) return;
 
     if (!name.trim()) {

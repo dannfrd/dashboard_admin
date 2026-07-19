@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   }, [load]);
 
   async function handleDelete(id?: number) {
-    if (!id) return;
+    if (!id || !window.confirm("Apakah Anda yakin ingin menghapus user ini? Semua data terkait (scan, histori) akan ikut terhapus.")) return;
     if (!confirm("Hapus user ini secara permanen dari database?")) return;
 
     try {

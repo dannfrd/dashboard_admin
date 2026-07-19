@@ -44,6 +44,7 @@ export default function EditIngredientPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Simpan perubahan data ingredient ini?")) return;
     if (!ingredientId) return;
 
     if (!name.trim()) {

@@ -44,6 +44,7 @@ export default function EditUserPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Simpan perubahan data user ini?")) return;
     if (!userId) return;
 
     if (!email.trim()) {

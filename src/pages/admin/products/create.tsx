@@ -24,6 +24,7 @@ export default function CreateProductPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Buat produk baru ini?")) return;
     if (!name.trim()) {
       setError("Nama produk wajib diisi.");
       return;

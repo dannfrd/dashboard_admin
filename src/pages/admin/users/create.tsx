@@ -22,6 +22,7 @@ export default function CreateUserPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!window.confirm("Buat user baru ini?")) return;
 
     if (!email.trim()) {
       setError("Email user wajib diisi.");
