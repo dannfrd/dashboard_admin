@@ -32,6 +32,8 @@ export type DermifyUser = {
   email?: string | null;
   role?: string | null;
   provider?: string | null;
+  fcm_token?: string | null;
+  device_token?: string | null;
   analysis_count: number;
   last_analysis_at?: string | null;
   created_at?: string | null;
@@ -91,6 +93,13 @@ export type DermifyHistory = {
   analysis_status?: string | null;
   analysis_created_at?: string | null;
   viewed_at?: string | null;
+  created_at?: string | null;
+  product_name?: string | null;
+  product_brand?: string | null;
+  summary?: string | null;
+  recommendation?: string | null;
+  raw_text?: string | null;
+  matched_ingredient_count?: number | null;
 };
 
 export type DermifyDashboardData = {
@@ -168,6 +177,95 @@ export async function loginAdmin(email: string, password: string) {
   }
 
   return payload;
+}
+
+export type UserCreateRequest = {
+  name?: string | null;
+  email: string;
+  password?: string | null;
+  role?: string | null;
+};
+
+export type UserUpdateRequest = {
+  name?: string | null;
+  email?: string | null;
+  password?: string | null;
+  role?: string | null;
+};
+
+export async function listUsers(): Promise<DermifyUser[]> {
+  return getJson<DermifyUser[]>("/metrics/users?limit=1000");
+}
+
+export async function createUser(payload: UserCreateRequest) {
+  const response = await fetch(`${API_BASE_URL}/admin/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal membuat user");
+  }
+
+  return data as { id: number };
+}
+
+export async function getUser(userId: number): Promise<DermifyUser> {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    headers: getHeaders(),
+  });
+
+  const text = await response.text();
+  let payload: any;
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    payload = text;
+  }
+
+  if (!response.ok) {
+    const detail = payload && payload.detail ? payload.detail : text || `Status ${response.status}`;
+    throw new Error(String(detail));
+  }
+
+  return payload as DermifyUser;
+}
+
+export async function updateUser(userId: number, payload: UserUpdateRequest) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getHeaders() || {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal memperbarui user");
+  }
+
+  return data;
+}
+
+export async function deleteUser(userId: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error((data && data.detail) || "Gagal menghapus user");
+  }
+
+  return data;
 }
 
 export type ProductCreateRequest = {
@@ -350,6 +448,13 @@ export type NotificationItem = {
   body?: string | null;
   data?: Record<string, any> | null;
   topic?: string | null;
+  user_id?: number | null;
+  target_user_id?: number | null;
+  user?: {
+    id?: number | null;
+    name?: string | null;
+    email?: string | null;
+  } | null;
   tokens?: string[] | null;
   status: string;
   scheduled_at?: string | null;
@@ -363,6 +468,8 @@ export type NotificationCreateRequest = {
   body?: string | null;
   data?: Record<string, any> | null;
   topic?: string | null;
+  user_id?: number | null;
+  target_user_id?: number | null;
   tokens?: string[] | null;
   scheduled_at?: string | null; // ISO
   send_now?: boolean;
@@ -632,9 +739,15 @@ export async function getDermifyDashboardData(
     };
   }
 
+  const [histories, analyses] = await Promise.all([
+    getJson<DermifyHistory[]>("/metrics/user-histories?limit=1000"),
+    getJson<DermifyAnalysis[]>("/metrics/analyses?limit=1000"),
+  ]);
+
   return {
     ...data,
-    histories: await getJson<DermifyHistory[]>("/metrics/user-histories?limit=1000"),
+    histories,
+    analyses,
   };
 }
 

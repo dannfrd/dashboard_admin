@@ -66,11 +66,13 @@ export default async function handler(
   const isAdminProductRoute = path.startsWith("admin/products");
   const isAdminIngredientRoute = path.startsWith("admin/ingredients");
   const isAdminNotificationRoute = path.startsWith("admin/notifications");
+  const isAdminUserRoute = path.startsWith("admin/users");
   const isAdminRoute =
     ADMIN_ROUTES.has(path) ||
     isAdminProductRoute ||
     isAdminIngredientRoute ||
-    isAdminNotificationRoute;
+    isAdminNotificationRoute ||
+    isAdminUserRoute;
   if (!PUBLIC_ROUTES.has(path) && !isAdminRoute) {
     return response.status(404).json({ detail: "Endpoint tidak ditemukan." });
   }

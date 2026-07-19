@@ -12,6 +12,7 @@ import {
   deleteProduct,
   deleteIngredient,
 } from "@/lib/dermifyApi";
+import { Spinner } from "@/components/admin/ui";
 
 export type DashboardView = DermifyDashboardView;
 
@@ -196,18 +197,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
   const analysis = data.summary.analysis || {};
   const ingredients = data.summary.ingredients || {};
   const entities = data.summary.entities || {};
-  const completedRate =
-    analysis.total && analysis.completed
-      ? Math.round((analysis.completed / analysis.total) * 100)
-      : 0;
-  const riskTotal =
-    (ingredients.low_risk || 0) +
-    (ingredients.medium_risk || 0) +
-    (ingredients.high_risk || 0) +
-    (ingredients.unknown_risk || 0);
-  const highRiskWidth = riskTotal
-    ? Math.max(4, Math.round(((ingredients.high_risk || 0) / riskTotal) * 100))
-    : 0;
   const latestAnalyses = data.analyses.slice(0, 4);
   const popularIngredients = [...data.ingredients]
     .sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0))
@@ -215,66 +204,35 @@ function Overview({ data }: { data: DermifyDashboardData }) {
 
   return (
     <div className="space-y-6">
-      <section className="grid h-48 grid-cols-1 gap-4 md:h-40 lg:h-44 lg:grid-cols-4">
-        <Link href="/analyses" className="block h-full">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Link href="/analyses" className="block">
           <StatCard
             label="Total Analysis"
             value={formatNumber(analysis.total)}
             detail={`${formatNumber(analysis.last_24h)} scans entered in the last 24 hours`}
           />
         </Link>
-        <Link href="/users" className="block h-full">
+        <Link href="/users" className="block">
           <StatCard
             label="Users"
             value={formatNumber(entities.users)}
             detail="Total accounts stored in the platform"
           />
         </Link>
-        <Link href="/ingredients" className="block h-full">
+        <Link href="/ingredients" className="block">
           <StatCard
             label="Ingredient DB"
             value={formatNumber(ingredients.total || entities.ingredients)}
             detail={`${formatNumber(ingredients.high_risk)} high risk ingredient`}
           />
         </Link>
-        <Link href="/products" className="block h-full">
+        <Link href="/products" className="block">
           <StatCard
             label="Products"
             value={formatNumber(entities.products)}
             detail={`${formatNumber(entities.scans)} scans from the mobile app`}
           />
         </Link>
-      </section>
-
-      <section >
-        <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="grid grid-cols-1">
-            <div className="p-6">
-              <h1 className="mt-3 max-w-2xl text-3xl font-bold text-slate-950">
-                Monitor skincare analysis performance.
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Monitor user activities, analysis results, and ingredient database developments.
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MiniMetric label="Completed" value={`${completedRate}%`} />
-                <MiniMetric
-                  label="Last 7 days"
-                  value={formatNumber(analysis.last_7d)}
-                />
-                <MiniMetric
-                  label="Details"
-                  value={formatNumber(entities.analysis_details)}
-                />
-                <MiniMetric
-                  label="Records"
-                  value={formatNumber(entities.total_records)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]">
@@ -319,42 +277,6 @@ function Overview({ data }: { data: DermifyDashboardData }) {
           )}
         </Panel>
       </section>
-    </div>
-  );
-}
-
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-lg font-bold text-slate-950">{value}</p>
-    </div>
-  );
-}
-
-function RiskLine({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value?: number;
-  tone: "emerald" | "amber" | "rose" | "slate";
-}) {
-  const dot = {
-    emerald: "bg-emerald-400",
-    amber: "bg-amber-400",
-    rose: "bg-rose-400",
-    slate: "bg-slate-400",
-  };
-
-  return (
-    <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-      <span className="flex items-center gap-2 text-slate-600">
-        <span className={`h-2.5 w-2.5 rounded-full ${dot[tone]}`} />
-        {label}
-      </span>
-      <span className="font-semibold text-slate-900">{formatNumber(value)}</span>
     </div>
   );
 }
@@ -483,7 +405,7 @@ function UsersTable({ items }: { items: DermifyUser[] }) {
   );
 }
 
-function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?: (id: number) => Promise<void> }) {
+function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?: (_id: number) => Promise<void> }) {
   const pageSize = 10;
   const {
     currentPage,
@@ -553,7 +475,7 @@ function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?
   );
 }
 
-function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onDelete?: (id: number) => Promise<void> }) {
+function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onDelete?: (_id: number) => Promise<void> }) {
   if (!items.length) {
     return <EmptyState label="Tidak ada data ingredient." />;
   }
@@ -601,8 +523,56 @@ function IngredientsTable({ items, onDelete }: { items: DermifyIngredient[]; onD
   return <Table headers={headers} rows={rows} />;
 }
 
+type HistoryActivity = {
+  key: string;
+  user: string;
+  product: string;
+  detail: string;
+  status?: string | null;
+  date?: string | null;
+};
+
 function HistoriesTable({ data }: { data: DermifyDashboardData }) {
-  const items = data.histories;
+  const items = React.useMemo<HistoryActivity[]>(() => {
+    const historyItems = data.histories.map((item) => ({
+      key: `history-${item.id}`,
+      user: item.user_name || item.user_email || "-",
+      product:
+        item.product_name || item.product_brand
+          ? [item.product_brand, item.product_name].filter(Boolean).join(" - ")
+          : "-",
+      detail:
+        item.summary ||
+        item.recommendation ||
+        item.raw_text ||
+        "User membuka riwayat analisis.",
+      status: item.analysis_status,
+      date: item.viewed_at || item.analysis_created_at || item.created_at,
+    }));
+
+    const analysisItems = data.analyses.map((item) => ({
+      key: `analysis-${item.id}`,
+      user: item.user?.name || item.user?.email || "-",
+      product:
+        item.product?.name || item.product?.brand
+          ? [item.product?.brand, item.product?.name].filter(Boolean).join(" - ")
+          : "-",
+      detail:
+        item.summary ||
+        item.recommendation ||
+        item.raw_text ||
+        `${formatNumber(item.matched_ingredient_count)} matched ingredient`,
+      status: item.status,
+      date: item.created_at,
+    }));
+
+    return [...historyItems, ...analysisItems].sort((first, second) => {
+      const firstTime = first.date ? new Date(first.date).getTime() : 0;
+      const secondTime = second.date ? new Date(second.date).getTime() : 0;
+      return secondTime - firstTime;
+    });
+  }, [data.analyses, data.histories]);
+
   const pageSize = 10;
   const {
     currentPage,
@@ -613,7 +583,7 @@ function HistoriesTable({ data }: { data: DermifyDashboardData }) {
     setCurrentPage,
   } = usePagedItems(items, pageSize);
 
-  if (!data.histories.length) {
+  if (!items.length) {
     return <EmptyState label="No history data available." />;
   }
 
@@ -630,13 +600,18 @@ function HistoriesTable({ data }: { data: DermifyDashboardData }) {
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
       <Table
-        headers={["No", "User", "Analysis", "Status", "Viewed"]}
+        headers={["No", "User", "Product", "Detail", "Status", "Time"]}
         rows={paginatedItems.map((item, index) => [
           String((currentPage - 1) * pageSize + index + 1),
-          item.user_name || item.user_email || "-",
-          item.analysis_id ? `#${item.analysis_id}` : "-",
-          <Badge key="history-status" value={item.analysis_status} />,
-          formatDate(item.viewed_at),
+          item.user,
+          (
+            <span key="product" className="font-semibold text-slate-900">
+              {item.product}
+            </span>
+          ),
+          item.detail,
+          <Badge key="history-status" value={item.status} />,
+          formatDate(item.date),
         ])}
       />
       <PaginationBar
@@ -806,7 +781,13 @@ export function Content({ initialView = "overview" }: ContentProps) {
 
       {isLoading ? (
         <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-          Loading platform data...
+          <Spinner className="mx-auto h-10 w-10 text-emerald-600" />
+          <p className="mt-4 font-medium">Loading platform data...</p>
+          <div className="mx-auto mt-6 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="h-3 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-3 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-3 animate-pulse rounded-full bg-slate-100" />
+          </div>
         </div>
       ) : (
         <DataView activeView={initialView} data={data} />

@@ -197,7 +197,7 @@ export default function LoginPage() {
         </section>
         <section className="relative hidden min-h-full overflow-hidden bg-slate-950 lg:block">
           <Image
-            src="/images/pict3.png"
+            src="/images/pict3.webp"
             alt="Dermify skincare product analysis"
             fill
             className="object-cover"

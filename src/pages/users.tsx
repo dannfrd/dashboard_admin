@@ -1,5 +1,12 @@
-import { Content } from "@/components/Content";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 export default function UsersPage() {
-  return <Content initialView="users" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/admin/users");
+  }, [router]);
+
+  return null;
 }
