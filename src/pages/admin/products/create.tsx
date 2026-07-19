@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { createProduct } from "@/lib/dermifyApi";
 import {
   AdminCard,
+  AdminImagePreview,
   AdminPageHeader,
   AdminPageShell,
   AlertBanner,
@@ -16,6 +17,7 @@ export default function CreateProductPage() {
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [barcode, setBarcode] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -35,6 +37,7 @@ export default function CreateProductPage() {
         brand: brand.trim() || null,
         category: category.trim() || null,
         barcode: barcode.trim() || null,
+        image_url: imageUrl.trim() || null,
       });
       router.push("/admin/products");
     } catch (err: any) {
@@ -100,6 +103,22 @@ export default function CreateProductPage() {
               onChange={(event) => setBarcode(event.target.value)}
               placeholder="Contoh: 899000000001"
               className={`${inputClassName} font-mono`}
+            />
+          </div>
+
+          <div>
+            <FieldLabel>URL Gambar Produk</FieldLabel>
+            <input
+              type="text"
+              value={imageUrl}
+              onChange={(event) => setImageUrl(event.target.value)}
+              placeholder="https://... atau /uploads/nama-file.jpg"
+              className={inputClassName}
+            />
+            <AdminImagePreview
+              src={imageUrl}
+              alt={name || "Preview gambar produk"}
+              className="mt-3"
             />
           </div>
 

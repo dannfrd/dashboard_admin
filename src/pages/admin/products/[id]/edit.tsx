@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { getProduct, updateProduct } from "@/lib/dermifyApi";
 import {
   AdminCard,
+  AdminImagePreview,
   AdminPageHeader,
   AdminPageShell,
   AlertBanner,
@@ -21,6 +22,7 @@ export default function EditProductPage() {
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [barcode, setBarcode] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export default function EditProductPage() {
         setBrand(product.brand || "");
         setCategory(product.category || "");
         setBarcode(product.barcode || "");
+        setImageUrl(product.image_url || "");
       })
       .catch((err: any) => {
         setError(err?.message || "Gagal memuat detail produk");
@@ -60,6 +63,7 @@ export default function EditProductPage() {
         brand: brand.trim() || null,
         category: category.trim() || null,
         barcode: barcode.trim() || null,
+        image_url: imageUrl.trim() || null,
       });
       router.push("/admin/products");
     } catch (err: any) {
@@ -133,6 +137,22 @@ export default function EditProductPage() {
               onChange={(event) => setBarcode(event.target.value)}
               placeholder="Contoh: 899000000001"
               className={`${inputClassName} font-mono`}
+            />
+          </div>
+
+          <div>
+            <FieldLabel>URL Gambar Produk</FieldLabel>
+            <input
+              type="text"
+              value={imageUrl}
+              onChange={(event) => setImageUrl(event.target.value)}
+              placeholder="https://... atau /uploads/nama-file.jpg"
+              className={inputClassName}
+            />
+            <AdminImagePreview
+              src={imageUrl}
+              alt={name || "Preview gambar produk"}
+              className="mt-3"
             />
           </div>
 

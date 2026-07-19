@@ -7,6 +7,7 @@ import {
 } from "@/lib/dermifyApi";
 import {
   AdminLinkButton,
+  AdminImagePreview,
   AdminPageHeader,
   AdminPageShell,
   AdminTable,
@@ -157,7 +158,7 @@ export default function AdminProductsPage() {
         <AdminTable
           headers={[
             { label: "No" },
-            { label: "Produk" },
+            { label: "Gambar" },
             { label: "Brand" },
             { label: "Kategori" },
             { label: "Scan", align: "center" },
@@ -176,15 +177,12 @@ export default function AdminProductsPage() {
                 <td className="whitespace-nowrap p-4 font-mono text-xs text-slate-400">
                   {(currentPage - 1) * pageSize + index + 1}
                 </td>
-                <td className="max-w-xs p-4">
-                  <p className="truncate font-semibold text-slate-950">
-                    {product.name || "-"}
-                  </p>
-                  {product.barcode && (
-                    <p className="mt-1 truncate font-mono text-xs text-slate-500">
-                      Barcode: {product.barcode}
-                    </p>
-                  )}
+                <td className="whitespace-nowrap p-4">
+                  <AdminImagePreview
+                    src={product.image_url}
+                    alt={product.name || "Gambar produk"}
+                    compact
+                  />
                 </td>
                 <td className="whitespace-nowrap p-4 text-slate-600">
                   {product.brand || "-"}

@@ -25,6 +25,58 @@ export const neutralIconButtonClassName =
 export const positiveIconButtonClassName =
   "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-100 bg-white text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60";
 
+export function resolveAdminImageSrc(src?: string | null) {
+  const normalized = String(src || "").trim();
+  if (!normalized) return "";
+  if (/^(https?:|data:|blob:)/i.test(normalized)) return normalized;
+  if (normalized.startsWith("/uploads/")) return `/api/dermify${normalized}`;
+  return normalized;
+}
+
+export function AdminImagePreview({
+  src,
+  alt,
+  className,
+  compact = false,
+}: {
+  src?: string | null;
+  alt: string;
+  className?: string;
+  compact?: boolean;
+}) {
+  const [failed, setFailed] = React.useState(false);
+  const resolvedSrc = resolveAdminImageSrc(src);
+  const showImage = Boolean(resolvedSrc) && !failed;
+
+  React.useEffect(() => {
+    setFailed(false);
+  }, [resolvedSrc]);
+
+  return (
+    <div
+      className={cx(
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50",
+        compact ? "h-12 w-12" : "h-48 w-full",
+        className,
+      )}
+    >
+      {showImage ? (
+        <img
+          src={resolvedSrc}
+          alt={alt}
+          loading="lazy"
+          className="h-full w-full object-contain p-1"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="px-2 text-center text-xs font-medium text-slate-400">
+          Tidak ada gambar
+        </span>
+      )}
+    </div>
+  );
+}
+
 type IconProps = { className?: string };
 
 function Svg({

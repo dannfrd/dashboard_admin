@@ -67,14 +67,20 @@ export default async function handler(
   const isAdminIngredientRoute = path.startsWith("admin/ingredients");
   const isAdminNotificationRoute = path.startsWith("admin/notifications");
   const isAdminUserRoute = path.startsWith("admin/users");
+  const isUploadRoute = path.startsWith("uploads/");
   const isAdminRoute =
     ADMIN_ROUTES.has(path) ||
     isAdminProductRoute ||
     isAdminIngredientRoute ||
     isAdminNotificationRoute ||
     isAdminUserRoute;
-  if (!PUBLIC_ROUTES.has(path) && !isAdminRoute) {
+  if (!PUBLIC_ROUTES.has(path) && !isAdminRoute && !isUploadRoute) {
     return response.status(404).json({ detail: "Endpoint tidak ditemukan." });
+  }
+
+  if (isUploadRoute && request.method !== "GET") {
+    response.setHeader("Allow", ["GET"]);
+    return response.status(405).json({ detail: "Method tidak diizinkan." });
   }
 
   const authorization = request.headers.authorization;
@@ -123,6 +129,13 @@ export default async function handler(
 
     const contentType =
       upstreamResponse.headers.get("content-type") || "application/json";
+    if (isUploadRoute) {
+      const payload = Buffer.from(await upstreamResponse.arrayBuffer());
+      response.setHeader("Content-Type", contentType);
+      response.setHeader("Cache-Control", upstreamResponse.ok ? "public, max-age=3600" : "no-store");
+      return response.status(upstreamResponse.status).send(payload);
+    }
+
     const payload = await upstreamResponse.text();
 
     // Debug: log upstream response status/body when not OK

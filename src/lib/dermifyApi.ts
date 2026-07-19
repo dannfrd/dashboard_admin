@@ -45,6 +45,7 @@ export type DermifyProduct = {
   brand?: string | null;
   category?: string | null;
   barcode?: string | null;
+  image_url?: string | null;
   scan_count: number;
   analysis_count: number;
   created_at?: string | null;
@@ -273,6 +274,7 @@ export type ProductCreateRequest = {
   brand?: string | null;
   category?: string | null;
   barcode?: string | null;
+  image_url?: string | null;
 };
 
 export type ProductUpdateRequest = {
@@ -280,6 +282,7 @@ export type ProductUpdateRequest = {
   brand?: string | null;
   category?: string | null;
   barcode?: string | null;
+  image_url?: string | null;
 };
 
 export async function createProduct(payload: ProductCreateRequest) {
