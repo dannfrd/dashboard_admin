@@ -125,13 +125,48 @@ export default function EditProductPage() {
             </div>
             <div>
               <FieldLabel>Kategori</FieldLabel>
-              <input
-                type="text"
+              <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                placeholder="Contoh: Cleanser, Serum, Toner"
                 className={inputClassName}
-              />
+              >
+                <option value="">-- Pilih Kategori --</option>
+                <optgroup label="🧴 Cleanser">
+                  <option value="Cleanser">Cleanser</option>
+                  <option value="Micellar Water">Micellar Water</option>
+                  <option value="Cleansing Oil/Balm">Cleansing Oil / Balm</option>
+                </optgroup>
+                <optgroup label="💧 Basic Treatment">
+                  <option value="Toner">Toner</option>
+                  <option value="Essence">Essence</option>
+                </optgroup>
+                <optgroup label="🔬 Active Treatment">
+                  <option value="Serum">Serum</option>
+                  <option value="Ampoule">Ampoule</option>
+                  <option value="Spot Treatment">Spot Treatment</option>
+                  <option value="Retinol">Retinol</option>
+                </optgroup>
+                <optgroup label="🌿 Moisturizer">
+                  <option value="Moisturizer">Moisturizer</option>
+                  <option value="Night Cream">Night Cream</option>
+                </optgroup>
+                <optgroup label="👁️ Eye &amp; Lip">
+                  <option value="Eye Care">Eye Care</option>
+                  <option value="Lip Care">Lip Care</option>
+                </optgroup>
+                <optgroup label="☀️ Sunscreen">
+                  <option value="Sunscreen">Sunscreen</option>
+                </optgroup>
+                <optgroup label="✨ Periodic Care">
+                  <option value="Exfoliator">Exfoliator</option>
+                  <option value="Face Mask">Face Mask</option>
+                  <option value="Sheet Mask">Sheet Mask</option>
+                  <option value="Facial Mist">Facial Mist</option>
+                </optgroup>
+                <optgroup label="🫧 Minyak Wajah">
+                  <option value="Facial Oil">Facial Oil (Minyak Wajah)</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 
