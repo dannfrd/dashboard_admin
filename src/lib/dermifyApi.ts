@@ -64,6 +64,7 @@ export type DermifyIngredient = {
 export type DermifyAnalysis = {
   id: number;
   scan_id?: number | null;
+  image_url?: string | null;
   raw_text?: string | null;
   summary?: string | null;
   recommendation?: string | null;
@@ -93,6 +94,7 @@ export type DermifyHistory = {
   analysis_id?: number | null;
   analysis_status?: string | null;
   analysis_created_at?: string | null;
+  image_url?: string | null;
   viewed_at?: string | null;
   created_at?: string | null;
   product_name?: string | null;

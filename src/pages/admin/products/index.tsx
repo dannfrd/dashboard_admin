@@ -158,7 +158,6 @@ export default function AdminProductsPage() {
         <AdminTable
           headers={[
             { label: "No" },
-            { label: "Gambar" },
             { label: "Brand" },
             { label: "Kategori" },
             { label: "Scan", align: "center" },
@@ -166,7 +165,7 @@ export default function AdminProductsPage() {
           ]}
         >
           {paginatedProducts.length === 0 ? (
-            <EmptyTableRow colSpan={6}>
+            <EmptyTableRow colSpan={5}>
               {searchQuery
                 ? "Tidak ada produk yang sesuai dengan pencarian."
                 : "Belum ada data produk."}
@@ -176,13 +175,6 @@ export default function AdminProductsPage() {
               <tr key={product.id} className="transition-colors hover:bg-emerald-50/30">
                 <td className="whitespace-nowrap p-4 font-mono text-xs text-slate-400">
                   {(currentPage - 1) * pageSize + index + 1}
-                </td>
-                <td className="whitespace-nowrap p-4">
-                  <AdminImagePreview
-                    src={product.image_url}
-                    alt={product.name || "Gambar produk"}
-                    compact
-                  />
                 </td>
                 <td className="whitespace-nowrap p-4 text-slate-600">
                   {product.brand || "-"}

@@ -73,7 +73,7 @@ export const data = [
   },
   {
     title: "History",
-    link: "/histories",
+    link: "/admin/history",
     icon: (
       <path
         d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"
