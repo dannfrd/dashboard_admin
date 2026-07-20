@@ -28,6 +28,7 @@ import {
   StatCard,
   StatusBadge,
   TrashIcon,
+  useConfirm,
 } from "@/components/admin/ui";
 
 const pageSize = 10;
@@ -58,6 +59,7 @@ function targetLabel(item: NotificationItem) {
 }
 
 export default function AdminNotificationsPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,8 @@ export default function AdminNotificationsPage() {
   }, [load]);
 
   async function handleSend(id: number) {
-    if (!confirm("Kirim notifikasi ini ke target user sekarang?")) return;
+    const ok = await confirm("Kirim notifikasi ini ke target user sekarang?");
+    if (!ok) return;
 
     setSendingId(id);
     try {
@@ -93,7 +96,8 @@ export default function AdminNotificationsPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Hapus notifikasi ini secara permanen dari sistem?")) return;
+    const ok = await confirm("Hapus notifikasi ini secara permanen dari sistem?");
+    if (!ok) return;
 
     try {
       await deleteNotification(id);
@@ -312,6 +316,7 @@ export default function AdminNotificationsPage() {
         onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

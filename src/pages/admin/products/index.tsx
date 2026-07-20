@@ -23,11 +23,13 @@ import {
   StatCard,
   TrashIcon,
   dangerIconButtonClassName,
+  useConfirm,
 } from "@/components/admin/ui";
 
 const pageSize = 10;
 
 export default function AdminProductsPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [products, setProducts] = useState<DermifyProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -49,7 +51,8 @@ export default function AdminProductsPage() {
 
   async function handleDelete(id?: number) {
     if (!id) return;
-    if (!confirm("Hapus produk ini secara permanen dari database?")) return;
+    const ok = await confirm("Hapus produk ini secara permanen dari database?");
+    if (!ok) return;
 
     try {
       await deleteProduct(id);
@@ -225,6 +228,7 @@ export default function AdminProductsPage() {
         onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

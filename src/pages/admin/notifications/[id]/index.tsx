@@ -16,6 +16,7 @@ import {
   SendIcon,
   Spinner,
   StatusBadge,
+  useConfirm,
 } from "@/components/admin/ui";
 
 function formatDate(dateString?: string | null) {
@@ -74,6 +75,7 @@ function DetailItem({
 }
 
 export default function ViewNotificationPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const router = useRouter();
   const { id } = router.query;
   const noteId = Number(id);
@@ -100,7 +102,8 @@ export default function ViewNotificationPage() {
 
   async function handleSend() {
     if (!noteId) return;
-    if (!confirm("Kirim notifikasi ini sekarang ke target user?")) return;
+    const ok = await confirm("Kirim notifikasi ini sekarang ke target user?");
+    if (!ok) return;
 
     setSending(true);
     try {
@@ -118,6 +121,7 @@ export default function ViewNotificationPage() {
     return (
       <AdminPageShell>
         <LoadingPanel label="Memuat detail notifikasi..." />
+        <ConfirmDialog />
       </AdminPageShell>
     );
   }
@@ -203,6 +207,7 @@ export default function ViewNotificationPage() {
           />
         </div>
       </div>
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }

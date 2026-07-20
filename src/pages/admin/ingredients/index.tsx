@@ -23,11 +23,13 @@ import {
   SearchField,
   StatCard,
   TrashIcon,
+  useConfirm,
 } from "@/components/admin/ui";
 
 const pageSize = 10;
 
 export default function AdminIngredientsPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [items, setItems] = useState<DermifyIngredient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,8 @@ export default function AdminIngredientsPage() {
 
   async function handleDelete(id?: number) {
     if (!id) return;
-    if (!confirm("Hapus ingredient ini secara permanen dari database?")) return;
+    const ok = await confirm("Hapus ingredient ini secara permanen dari database?");
+    if (!ok) return;
 
     try {
       await deleteIngredient(id);
@@ -222,6 +225,7 @@ export default function AdminIngredientsPage() {
         onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
+      <ConfirmDialog />
     </AdminPageShell>
   );
 }
