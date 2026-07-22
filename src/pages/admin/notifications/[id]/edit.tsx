@@ -180,7 +180,7 @@ export default function EditNotificationPage() {
         target_user_id: userId,
         scheduled_at:
           schedulingType === "schedule" && scheduledAt
-            ? new Date(scheduledAt).toISOString()
+            ? (scheduledAt.length === 16 ? scheduledAt + ":00" : scheduledAt)
             : undefined,
         send_now: schedulingType === "now",
         repeat_daily: schedulingType === "schedule" ? repeatDaily : false,
