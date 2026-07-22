@@ -184,6 +184,7 @@ export default function EditNotificationPage() {
             : undefined,
         send_now: schedulingType === "now",
         repeat_daily: schedulingType === "schedule" ? repeatDaily : false,
+        repeat_time: schedulingType === "schedule" && repeatDaily && scheduledAt ? scheduledAt.split("T")[1] : undefined,
       });
       router.push("/admin/notifications");
     } catch (err: any) {
