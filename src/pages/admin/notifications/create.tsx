@@ -62,6 +62,7 @@ export default function CreateNotificationPage() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [schedulingType, setSchedulingType] = useState<SchedulingType>("now");
   const [scheduledAt, setScheduledAt] = useState("");
+  const [repeatDaily, setRepeatDaily] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,6 +115,7 @@ export default function CreateNotificationPage() {
             ? new Date(scheduledAt).toISOString()
             : undefined,
         send_now: schedulingType === "now",
+        repeat_daily: schedulingType === "schedule" ? repeatDaily : false,
       });
       router.push("/admin/notifications");
     } catch (err: any) {
@@ -233,13 +235,30 @@ export default function CreateNotificationPage() {
               </div>
 
               {schedulingType === "schedule" && (
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(event) => setScheduledAt(event.target.value)}
-                  className={inputClassName}
-                  required
-                />
+                <div className="space-y-3">
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(event) => setScheduledAt(event.target.value)}
+                    className={inputClassName}
+                    required
+                  />
+                  {/* Repeat every day option */}
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition hover:bg-emerald-50/50">
+                    <input
+                      type="checkbox"
+                      checked={repeatDaily}
+                      onChange={(e) => setRepeatDaily(e.target.checked)}
+                      className="h-4 w-4 rounded accent-emerald-600"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">Ulangi setiap hari</p>
+                      <p className="text-xs text-slate-500">
+                        Notifikasi dikirim otomatis setiap pagi pada jam yang sama secara berulang.
+                      </p>
+                    </div>
+                  </label>
+                </div>
               )}
             </div>
 

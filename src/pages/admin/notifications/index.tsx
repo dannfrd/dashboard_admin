@@ -247,9 +247,18 @@ export default function AdminNotificationsPage() {
                     </>
                   ) : item.scheduled_at ? (
                     <>
-                      <span className="block text-slate-400">Terjadwal</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">Terjadwal</span>
+                        {item.repeat_daily && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                            ↻ Harian
+                          </span>
+                        )}
+                      </div>
                       <span className="font-semibold text-slate-700">
-                        {formatDate(item.scheduled_at)}
+                        {item.repeat_daily && item.repeat_time
+                          ? `Setiap hari ${item.repeat_time} WIB`
+                          : formatDate(item.scheduled_at)}
                       </span>
                     </>
                   ) : (

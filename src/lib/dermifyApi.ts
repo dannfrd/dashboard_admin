@@ -465,6 +465,9 @@ export type NotificationItem = {
   scheduled_at?: string | null;
   sent_at?: string | null;
   sent_by?: number | null;
+  repeat_daily?: boolean | null;
+  repeat_time?: string | null;
+  last_sent_at?: string | null;
   created_at?: string | null;
 };
 
@@ -478,6 +481,8 @@ export type NotificationCreateRequest = {
   tokens?: string[] | null;
   scheduled_at?: string | null; // ISO
   send_now?: boolean;
+  repeat_daily?: boolean;
+  repeat_time?: string | null; // "HH:MM"
 };
 
 export async function createNotification(payload: NotificationCreateRequest) {
