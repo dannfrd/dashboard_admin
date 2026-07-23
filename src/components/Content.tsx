@@ -420,13 +420,12 @@ function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?
     return <EmptyState label="Tidak ada data product." />;
   }
 
-  const headers = ["No", "Product", "Brand", "Category", "Scans", "Analyses"];
+  const headers = ["No", "Brand", "Category", "Scans", "Analyses"];
   if (onDelete) headers.push("Actions");
 
   const rows = paginatedItems.map((item, index) => {
     const base = [
       String((currentPage - 1) * pageSize + index + 1),
-      item.name || "-",
       item.brand || "-",
       item.category || "-",
       formatNumber(item.scan_count),
@@ -460,7 +459,7 @@ function ProductsTable({ items, onDelete }: { items: DermifyProduct[]; onDelete?
 
   return (
     <div className="space-y-4">
-      <Table headers={["No", "Product", "Brand", "Category", "Scans", "Analyses", ...(onDelete ? ["Actions"] : [])]} rows={rows} />
+      <Table headers={["No", "Brand", "Category", "Scans", "Analyses", ...(onDelete ? ["Actions"] : [])]} rows={rows} />
       <PaginationBar
         label="products"
         currentPage={currentPage}

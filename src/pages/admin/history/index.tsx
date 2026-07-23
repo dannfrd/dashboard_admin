@@ -150,7 +150,7 @@ export default function AdminHistoryPage() {
                     "-"
                   )}
                 </td>
-                <td className="whitespace-nowrap p-4 text-slate-500 text-sm">
+                <td className="whitespace-nowrap p-4 text-sm text-slate-500">
                   {formatDate(item.created_at)}
                 </td>
               </tr>

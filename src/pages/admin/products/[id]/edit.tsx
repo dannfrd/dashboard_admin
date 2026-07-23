@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { getProduct, updateProduct } from "@/lib/dermifyApi";
 import {
   AdminCard,
-  AdminImagePreview,
   AdminPageHeader,
   AdminPageShell,
   AlertBanner,
@@ -21,11 +20,8 @@ export default function EditProductPage() {
   const { id } = router.query;
   const productId = Number(id);
 
-  const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
-  const [barcode, setBarcode] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +33,8 @@ export default function EditProductPage() {
     setError(null);
     getProduct(productId)
       .then((product) => {
-        setName(product.name || "");
         setBrand(product.brand || "");
         setCategory(product.category || "");
-        setBarcode(product.barcode || "");
-        setImageUrl(product.image_url || "");
       })
       .catch((err: any) => {
         setError(err?.message || "Gagal memuat detail produk");
@@ -55,8 +48,8 @@ export default function EditProductPage() {
     if (!ok) return;
     if (!productId) return;
 
-    if (!name.trim()) {
-      setError("Nama produk wajib diisi.");
+    if (!brand.trim()) {
+      setError("Brand wajib diisi.");
       return;
     }
 
@@ -64,11 +57,11 @@ export default function EditProductPage() {
     setError(null);
     try {
       await updateProduct(productId, {
-        name: name.trim(),
-        brand: brand.trim() || null,
+        name: brand.trim(),
+        brand: brand.trim(),
         category: category.trim() || null,
-        barcode: barcode.trim() || null,
-        image_url: imageUrl.trim() || null,
+        barcode: null,
+        image_url: null,
       });
       router.push("/admin/products");
     } catch (err: any) {
@@ -100,27 +93,16 @@ export default function EditProductPage() {
 
       <AdminCard className="p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <FieldLabel required>Nama Produk</FieldLabel>
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Contoh: Hydrating Cleanser"
-              className={inputClassName}
-              required
-            />
-          </div>
-
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <FieldLabel>Brand</FieldLabel>
+              <FieldLabel required>Brand</FieldLabel>
               <input
                 type="text"
                 value={brand}
                 onChange={(event) => setBrand(event.target.value)}
                 placeholder="Contoh: Dermify Lab"
                 className={inputClassName}
+                required
               />
             </div>
             <div>
@@ -168,33 +150,6 @@ export default function EditProductPage() {
                 </optgroup>
               </select>
             </div>
-          </div>
-
-          <div>
-            <FieldLabel>Barcode Produk</FieldLabel>
-            <input
-              type="text"
-              value={barcode}
-              onChange={(event) => setBarcode(event.target.value)}
-              placeholder="Contoh: 899000000001"
-              className={`${inputClassName} font-mono`}
-            />
-          </div>
-
-          <div>
-            <FieldLabel>URL Gambar Produk</FieldLabel>
-            <input
-              type="text"
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="https://... atau /uploads/nama-file.jpg"
-              className={inputClassName}
-            />
-            <AdminImagePreview
-              src={imageUrl}
-              alt={name || "Preview gambar produk"}
-              className="mt-3"
-            />
           </div>
 
           <FormActions
