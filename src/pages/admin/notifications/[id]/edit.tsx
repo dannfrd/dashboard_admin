@@ -29,13 +29,14 @@ type OpenAction = "" | "history" | "scan" | "tips_skincare";
 function formatDatetimeLocal(isoString?: string | null) {
   if (!isoString) return "";
 
-  const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate(),
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  let s = isoString;
+  if (s.endsWith("Z")) {
+    s = s.slice(0, -1);
+  }
+  if (s.length >= 16) {
+    return s.substring(0, 16);
+  }
+  return s;
 }
 
 function SegmentedButton({
