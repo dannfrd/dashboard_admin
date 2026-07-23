@@ -1,35 +1,25 @@
 import React, { useMemo, useState } from "react";
-import Link from "next/link";
 import {
-  deleteProduct,
   DermifyProduct,
   getDermifyDashboardData,
 } from "@/lib/dermifyApi";
 import {
-  AdminLinkButton,
   AdminPageHeader,
   AdminPageShell,
   AdminTable,
   AlertBanner,
   BoxIcon,
   ChartIcon,
-  EditIcon,
   EmptyTableRow,
   LoadingPanel,
-  neutralIconButtonClassName,
   PaginationBar,
-  PlusIcon,
   SearchField,
   StatCard,
-  TrashIcon,
-  dangerIconButtonClassName,
-  useConfirm,
 } from "@/components/admin/ui";
 
 const pageSize = 10;
 
 export default function AdminProductsPage() {
-  const { confirm, ConfirmDialog } = useConfirm();
   const [products, setProducts] = useState<DermifyProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -48,19 +38,6 @@ export default function AdminProductsPage() {
   React.useEffect(() => {
     load();
   }, [load]);
-
-  async function handleDelete(id?: number) {
-    if (!id) return;
-    const ok = await confirm("Hapus produk ini secara permanen dari database?");
-    if (!ok) return;
-
-    try {
-      await deleteProduct(id);
-      load();
-    } catch (err: any) {
-      alert(err?.message || "Gagal menghapus produk");
-    }
-  }
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -112,12 +89,6 @@ export default function AdminProductsPage() {
       <AdminPageHeader
         title="Manajemen Produk"
         description="Kelola database produk skincare, barcode, kategori, dan statistik pemindaian."
-        action={
-          <AdminLinkButton href="/admin/products/create">
-            <PlusIcon />
-            Tambah Produk
-          </AdminLinkButton>
-        }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -163,11 +134,10 @@ export default function AdminProductsPage() {
             { label: "Brand" },
             { label: "Kategori" },
             { label: "Scan", align: "center" },
-            { label: "Aksi", align: "center" },
           ]}
         >
           {paginatedProducts.length === 0 ? (
-            <EmptyTableRow colSpan={5}>
+            <EmptyTableRow colSpan={4}>
               {searchQuery
                 ? "Tidak ada produk yang sesuai dengan pencarian."
                 : "Belum ada data produk."}
@@ -193,25 +163,6 @@ export default function AdminProductsPage() {
                 <td className="whitespace-nowrap p-4 text-center font-semibold text-slate-700">
                   {(product.scan_count || 0).toLocaleString("id-ID")}
                 </td>
-                <td className="whitespace-nowrap p-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <Link
-                      href={`/admin/products/${product.id}/edit`}
-                      className={neutralIconButtonClassName}
-                      title="Edit produk"
-                    >
-                      <EditIcon />
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(product.id)}
-                      className={dangerIconButtonClassName}
-                      title="Hapus produk"
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                </td>
               </tr>
             ))
           )}
@@ -228,7 +179,6 @@ export default function AdminProductsPage() {
         onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
         onNext={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
       />
-      <ConfirmDialog />
     </AdminPageShell>
   );
 }
